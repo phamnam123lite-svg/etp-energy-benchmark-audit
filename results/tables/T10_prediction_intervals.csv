@@ -1,0 +1,17 @@
+target,features,method,coverage_%,mean_width_MWh,interval_score,coverage_first_half_%,coverage_second_half_%,n_fit,n_cal,n_test
+grid,RC,"Gaussian band, in-sample residuals",84.682,79.574,124.75,78.035,91.329,,,
+grid,RC,Split conformal,93.353,97.834,124.939,89.595,97.11,,,
+grid,RC,CQR,91.618,101.02,122.734,87.283,95.954,,,
+grid,RC,Adaptive conformal (ACI),90.173,96.337,124.878,90.751,89.595,825.0,207.0,346.0
+grid,RC_dyn,"Gaussian band, in-sample residuals",85.838,64.996,105.276,82.081,89.595,,,
+grid,RC_dyn,Split conformal,93.642,86.686,107.412,91.329,95.954,,,
+grid,RC_dyn,CQR,89.017,82.348,105.976,84.971,93.064,,,
+grid,RC_dyn,Adaptive conformal (ACI),91.04,80.702,106.288,89.595,92.486,825.0,207.0,346.0
+total,RC,"Gaussian band, in-sample residuals",79.48,48.813,104.432,78.035,80.925,,,
+total,RC,Split conformal,95.376,87.058,99.172,92.486,98.266,,,
+total,RC,CQR,95.087,91.22,99.704,91.908,98.266,,,
+total,RC,Adaptive conformal (ACI),89.884,73.186,92.423,92.486,87.283,825.0,207.0,346.0
+total,RC_dyn,"Gaussian band, in-sample residuals",78.324,42.892,88.653,72.832,83.815,,,
+total,RC_dyn,Split conformal,94.798,68.366,80.649,93.642,95.954,,,
+total,RC_dyn,CQR,91.618,69.511,82.089,88.439,94.798,,,
+total,RC_dyn,Adaptive conformal (ACI),90.462,57.112,76.636,91.908,89.017,825.0,207.0,346.0

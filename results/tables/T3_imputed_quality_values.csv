@@ -1,0 +1,5 @@
+variable,rows,measured_in_source,benchmark_equals_source_where_measured,not_measured_but_filled_in_benchmark,filled_share_%,filled_rows_test_period_%,note
+NH3-N,1382,1381,1381,1,0.1,0.0,
+BOD,1382,962,962,420,30.4,4.6,all 420 filled values equal COD/2 exactly
+COD,1382,1340,1340,42,3.0,5.2,
+TN,1382,138,138,1244,90.0,89.9,fill rule not documented

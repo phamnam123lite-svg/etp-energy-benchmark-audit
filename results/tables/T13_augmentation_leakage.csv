@@ -1,0 +1,7 @@
+scenario,lagged_energy_input,n_train,n_test,RMSE,MAE,MAPE_%,R2,bias,n,persistence_MAPE_%,persistence_RMSE,MAPE_%_original_rows_only,RMSE_original_rows_only
+"S0 no augmentation, chronological split",False,1031,346,44.214,34.238,12.846,-0.17,-2.081,346,11.623,43.245,12.846,44.214
+"S0 no augmentation, chronological split",True,1031,346,37.987,29.345,11.085,0.137,-0.152,346,11.623,43.245,11.085,37.987
+"S1 augment all rows, then split (order used in earlier work)",False,10310,3460,48.985,39.316,14.02,-0.528,-19.244,3460,1.285,4.77,12.938,44.656
+"S1 augment all rows, then split (order used in earlier work)",True,10310,3460,4.896,3.664,1.349,0.985,-0.05,3460,1.285,4.77,1.107,3.979
+"S2 split, then augment training rows only",False,10310,346,44.9,34.803,13.044,-0.206,-3.932,346,11.623,43.245,13.044,44.9
+"S2 split, then augment training rows only",True,10310,346,43.131,31.362,11.594,-0.113,-0.056,346,11.623,43.245,11.594,43.131

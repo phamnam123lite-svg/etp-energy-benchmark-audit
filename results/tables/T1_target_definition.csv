@@ -1,0 +1,12 @@
+,value
+benchmark rows,1382.0
+rows where benchmark 'total_grid' == feeder1 + feeder2 of the matching source record,1380.0
+max abs difference in remaining rows (MWh),82.089
+"mean grid import, benchmark dates (MWh/d)",275.0794
+"mean on-site generation, benchmark dates (MWh/d)",115.8055
+mean total supply = grid + generation (MWh/d),390.8849
+"generation share of total supply, mean (%)",29.9286
+"Pearson r(grid, generation), daily",-0.326
+"Pearson r(grid, total), daily",0.8976
+share of var(grid) from var(generation) [var(gen)/var(grid)],0.1973
+days with generation < 50 MWh (all 2014-2021 days),15.0

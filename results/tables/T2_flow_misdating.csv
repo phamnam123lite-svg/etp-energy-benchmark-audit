@@ -1,0 +1,17 @@
+variable,benchmark value compared with,n,pearson_r,median_abs_diff_kL_s,rows_equal_to_3_decimals
+inflow,"label date, UTC-day mean",1374,0.1083,0.6301,0
+inflow,"label date, local-day mean",1364,0.1057,0.6223,4
+inflow,"energy day (label + 1 d), local-day mean",1365,0.1218,0.622,1
+inflow,row position: i-th row <-> i-th source day from 2008-12-31,1382,0.9993,0.0462,15
+inflow,"row position, rows 0-349",350,0.9984,0.0475,9
+inflow,"row position, rows 350-699",350,0.9992,0.0445,1
+inflow,"row position, rows 700-1049",350,0.9993,0.0462,1
+inflow,"row position, rows 1050-1381",332,0.9992,0.0466,4
+outflow,"label date, UTC-day mean",1380,0.1978,0.9075,10
+outflow,"label date, local-day mean",1355,0.1189,0.9087,4
+outflow,"energy day (label + 1 d), local-day mean",1356,0.1393,0.8732,1
+outflow,row position: i-th row <-> i-th source day from 2008-12-31,1380,0.7342,0.0428,236
+outflow,"row position, rows 0-349",350,0.9985,0.0108,117
+outflow,"row position, rows 350-699",350,0.9991,0.0189,76
+outflow,"row position, rows 700-1049",348,0.8233,0.1113,27
+outflow,"row position, rows 1050-1381",332,0.4984,0.7066,16

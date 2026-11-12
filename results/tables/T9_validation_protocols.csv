@@ -1,0 +1,49 @@
+target,features,model,protocol,RMSE,MAE,MAPE_%,R2,bias,n,mean_fold_R2,min_fold_R2,RMSE_persistence_same_rows
+grid,BM,HGB,chronological hold-out (75/25),43.5283,33.9172,12.695,-0.1337,-2.811,346,,,40.6605
+grid,BM,HGB,rolling origin (5 expanding folds),45.0177,35.603,13.1895,-0.0432,-8.7217,1145,-0.145,-0.6365,39.5756
+grid,BM,HGB,shuffled 5-fold CV,36.902,28.2553,10.9356,0.3124,-0.0028,1378,0.3095,0.2593,38.4116
+grid,BM,RF,chronological hold-out (75/25),44.5437,35.1667,13.0941,-0.1872,-5.6179,346,,,40.6605
+grid,BM,RF,rolling origin (5 expanding folds),44.9233,35.7072,13.1845,-0.0389,-9.5501,1145,-0.1389,-0.723,39.5756
+grid,BM,RF,shuffled 5-fold CV,36.8395,28.4328,11.0196,0.3147,0.0429,1378,0.3118,0.2533,38.4116
+grid,BM_rowlag,HGB,chronological hold-out (75/25),36.9952,28.0552,10.547,0.1811,-1.6132,346,,,40.6605
+grid,BM_rowlag,HGB,rolling origin (5 expanding folds),37.5347,29.0574,10.9036,0.2748,-4.9589,1145,0.1933,-0.0067,39.5756
+grid,BM_rowlag,HGB,shuffled 5-fold CV,34.4151,25.9266,10.0286,0.402,-0.1548,1378,0.3969,0.3305,38.4116
+grid,BM_rowlag,RF,chronological hold-out (75/25),38.3745,29.1064,10.962,0.1188,-1.8311,346,,,40.6605
+grid,BM_rowlag,RF,rolling origin (5 expanding folds),38.1851,29.5578,11.0596,0.2494,-5.8603,1145,0.1666,-0.0761,39.5756
+grid,BM_rowlag,RF,shuffled 5-fold CV,34.1554,25.707,9.9324,0.411,-0.2506,1378,0.4053,0.3434,38.4116
+grid,RC,HGB,chronological hold-out (75/25),27.9613,21.1518,7.7148,0.5322,-3.5043,346,,,40.6605
+grid,RC,HGB,rolling origin (5 expanding folds),31.8024,24.8161,9.1191,0.4794,-6.6384,1145,0.4248,0.1274,39.5756
+grid,RC,HGB,shuffled 5-fold CV,26.9072,20.8806,7.9427,0.6344,-0.1262,1378,0.6322,0.5756,38.4116
+grid,RC,RF,chronological hold-out (75/25),28.6763,21.9328,8.0187,0.5079,-2.749,346,,,40.6605
+grid,RC,RF,rolling origin (5 expanding folds),32.0008,25.0246,9.2056,0.4729,-7.024,1145,0.4237,0.2625,39.5756
+grid,RC,RF,shuffled 5-fold CV,27.3984,21.2041,8.1322,0.621,0.1229,1378,0.619,0.5685,38.4116
+grid,RC_dyn,HGB,chronological hold-out (75/25),23.9799,18.163,6.6425,0.6559,-1.0811,346,,,40.6605
+grid,RC_dyn,HGB,rolling origin (5 expanding folds),24.9984,19.4682,7.2626,0.6783,-1.8865,1145,0.6423,0.5849,39.5756
+grid,RC_dyn,HGB,shuffled 5-fold CV,23.1766,17.7557,6.7683,0.7288,0.0976,1378,0.7269,0.689,38.4116
+grid,RC_dyn,RF,chronological hold-out (75/25),24.1292,18.5478,6.8642,0.6516,-0.3131,346,,,40.6605
+grid,RC_dyn,RF,rolling origin (5 expanding folds),25.1293,19.475,7.2934,0.6749,-2.3727,1145,0.641,0.5783,39.5756
+grid,RC_dyn,RF,shuffled 5-fold CV,22.9714,17.679,6.7574,0.7336,0.0501,1378,0.732,0.7134,38.4116
+total,BM,HGB,chronological hold-out (75/25),39.1406,30.9442,7.8297,-0.0976,-8.3628,346,,,40.2848
+total,BM,HGB,rolling origin (5 expanding folds),42.1382,32.7581,8.3608,0.0179,-8.7076,1145,-0.0238,-0.3143,39.5748
+total,BM,HGB,shuffled 5-fold CV,35.955,27.3311,7.1933,0.2803,0.0647,1378,0.2765,0.2123,38.2762
+total,BM,RF,chronological hold-out (75/25),40.0143,31.6414,7.9963,-0.1471,-9.7123,346,,,40.2848
+total,BM,RF,rolling origin (5 expanding folds),42.6035,33.0562,8.3988,-0.0039,-10.2581,1145,-0.048,-0.3865,39.5748
+total,BM,RF,shuffled 5-fold CV,35.6991,27.1023,7.1349,0.2905,-0.066,1378,0.2869,0.2064,38.2762
+total,BM_rowlag,HGB,chronological hold-out (75/25),35.3416,27.34,6.9768,0.1051,-5.3064,346,,,40.2848
+total,BM_rowlag,HGB,rolling origin (5 expanding folds),36.5164,27.9957,7.234,0.2625,-5.6382,1145,0.2188,0.0747,39.5748
+total,BM_rowlag,HGB,shuffled 5-fold CV,33.8008,25.179,6.6572,0.3639,-0.0424,1378,0.3587,0.3023,38.2762
+total,BM_rowlag,RF,chronological hold-out (75/25),35.8183,27.6395,7.0478,0.0808,-5.5941,346,,,40.2848
+total,BM_rowlag,RF,rolling origin (5 expanding folds),37.3188,28.4233,7.2985,0.2297,-6.9997,1145,0.189,0.0254,39.5748
+total,BM_rowlag,RF,shuffled 5-fold CV,33.4827,24.9091,6.5777,0.3758,-0.3557,1378,0.3701,0.3286,38.2762
+total,RC,HGB,chronological hold-out (75/25),22.6814,16.9675,4.2261,0.6314,-8.6212,346,,,40.2848
+total,RC,HGB,rolling origin (5 expanding folds),24.5648,19.023,4.8488,0.6662,-5.5598,1145,0.6528,0.571,39.5748
+total,RC,HGB,shuffled 5-fold CV,20.1084,15.2039,3.9871,0.7749,0.0814,1378,0.7747,0.7523,38.2762
+total,RC,RF,chronological hold-out (75/25),21.4925,16.6426,4.1288,0.6691,-7.178,346,,,40.2848
+total,RC,RF,rolling origin (5 expanding folds),25.8128,19.8564,5.0457,0.6315,-6.5355,1145,0.6246,0.4817,39.5748
+total,RC,RF,shuffled 5-fold CV,21.1261,16.0462,4.2251,0.7515,-0.0729,1378,0.7528,0.7302,38.2762
+total,RC_dyn,HGB,chronological hold-out (75/25),18.9828,14.829,3.7264,0.7418,-3.4056,346,,,40.2848
+total,RC_dyn,HGB,rolling origin (5 expanding folds),20.5306,15.8349,4.0713,0.7669,-1.8602,1145,0.7537,0.7236,39.5748
+total,RC_dyn,HGB,shuffled 5-fold CV,17.9337,13.593,3.5629,0.8209,-0.058,1378,0.821,0.7944,38.2762
+total,RC_dyn,RF,chronological hold-out (75/25),18.6948,14.5533,3.6524,0.7496,-2.8532,346,,,40.2848
+total,RC_dyn,RF,rolling origin (5 expanding folds),20.988,15.9459,4.1139,0.7564,-2.0438,1145,0.7477,0.7048,39.5748
+total,RC_dyn,RF,shuffled 5-fold CV,18.4733,13.9774,3.6758,0.81,-0.1707,1378,0.8106,0.7925,38.2762

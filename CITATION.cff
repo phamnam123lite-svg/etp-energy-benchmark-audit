@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this code or the reconstructed dataset, please cite the manuscript below and the original data sources listed in data/README.md."
+title: "Auditing a public benchmark for wastewater treatment plant energy prediction: code and data"
+type: software
+authors:
+  - family-names: Tran
+    given-names: Viet Nam
+    affiliation: "Faculty of Environment, Van Lang University, Ho Chi Minh City, Vietnam"
+date-released: 2026-11-12
+version: "0.2.0"
+license: MIT
+repository-code: "https://github.com/phamnam123lite-svg/etp-energy-benchmark-audit"
+preferred-citation:
+  type: unpublished
+  title: "Auditing a public benchmark for wastewater treatment plant energy prediction: misdated flows, an incomplete target and validation leakage in the Melbourne Eastern Treatment Plant dataset"
+  authors:
+    - family-names: Tran
+      given-names: Viet Nam
+  year: 2026
+  notes: "Manuscript draft, not peer reviewed"

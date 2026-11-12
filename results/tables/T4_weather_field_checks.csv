@@ -1,0 +1,10 @@
+,value
+SLP (sea-level pressure): rows equal to 0,1377
+SLP: non-zero rows,5
+"VV (visibility, km): max",512.0
+VV: rows > 50 km,27
+VG (max gust): rows equal to 0,716
+VG: zero share (%),51.8
+TM on 14-17 Jan 2014 heatwave days in file (deg C),2014-01-14=43.5; 2014-01-15=42.9; 2014-01-16=43.1
+mean T Dec-Feb (deg C),20.15
+mean T Jun-Aug (deg C),9.88

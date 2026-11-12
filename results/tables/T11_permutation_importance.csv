@@ -1,0 +1,43 @@
+target,group,RMSE_increase_mean,RMSE_increase_sd,baseline_RMSE
+grid,"Influent flow (mean, max, s.d.)",1.1623,0.2475,27.9613
+grid,Effluent flow,19.7653,1.0798,27.9613
+grid,"Influent quality (NH3-N, COD, BOD)",0.7418,0.2324,27.9613
+grid,Previous-day weather,-0.1277,0.0398,27.9613
+grid,Season,-0.543,0.2769,27.9613
+grid,single: qin_mean,1.2565,0.2367,27.9613
+grid,single: qin_max,-0.1109,0.0232,27.9613
+grid,single: qin_std,0.0001,0.0103,27.9613
+grid,single: qout_mean,19.8131,1.2885,27.9613
+grid,single: nh3_in,0.0058,0.0031,27.9613
+grid,single: cod_in,0.4953,0.1963,27.9613
+grid,single: bod_in,0.2286,0.0625,27.9613
+grid,single: T,-0.0502,0.0105,27.9613
+grid,single: TM,-0.0028,0.0134,27.9613
+grid,single: Tm,0.0021,0.0047,27.9613
+grid,single: H,-0.0504,0.0223,27.9613
+grid,single: PP,0.002,0.0026,27.9613
+grid,single: V,-0.0435,0.0233,27.9613
+grid,single: VM,-0.0111,0.0104,27.9613
+grid,single: month_sin,-0.1547,0.1611,27.9613
+grid,single: month_cos,-0.3744,0.1899,27.9613
+total,"Influent flow (mean, max, s.d.)",2.116,0.4079,22.6814
+total,Effluent flow,24.3717,1.3928,22.6814
+total,"Influent quality (NH3-N, COD, BOD)",1.2194,0.2721,22.6814
+total,Previous-day weather,0.3019,0.084,22.6814
+total,Season,0.487,0.2481,22.6814
+total,single: qin_mean,2.2747,0.3312,22.6814
+total,single: qin_max,-0.0316,0.0499,22.6814
+total,single: qin_std,0.0587,0.0561,22.6814
+total,single: qout_mean,24.2091,1.3254,22.6814
+total,single: nh3_in,0.0247,0.0923,22.6814
+total,single: cod_in,0.3524,0.1034,22.6814
+total,single: bod_in,0.6763,0.1409,22.6814
+total,single: T,0.0859,0.0557,22.6814
+total,single: TM,0.1058,0.0194,22.6814
+total,single: Tm,0.0983,0.0567,22.6814
+total,single: H,0.0037,0.0159,22.6814
+total,single: PP,-0.0009,0.0115,22.6814
+total,single: V,0.0032,0.0201,22.6814
+total,single: VM,0.0,0.0,22.6814
+total,single: month_sin,0.2217,0.194,22.6814
+total,single: month_cos,0.2391,0.126,22.6814

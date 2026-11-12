@@ -1,0 +1,5 @@
+target,regressor,base_load_a_MWh_d,a_ci_lo,a_ci_hi,marginal_b_kWh_m3,b_ci_lo,b_ci_hi,base_load_share_at_mean_flow_%,train_R2,holdout_RMSE,holdout_R2,holdout_MAPE_%,n_test
+grid,effluent flow,133.4076,120.1294,149.3388,0.3991,0.3607,0.4352,48.8043,0.5499,27.0597,0.5604,7.5679,334
+grid,influent flow,172.6986,138.8248,206.0929,0.259,0.179,0.3468,63.2721,0.1344,39.8387,0.0518,11.5631,345
+total,effluent flow,237.7378,227.6767,249.5441,0.4301,0.4009,0.4563,61.1877,0.6953,23.276,0.6143,4.6367,334
+total,influent flow,283.9183,251.6106,315.0536,0.2698,0.1949,0.3526,73.1116,0.1585,36.95,0.0229,7.4686,345
