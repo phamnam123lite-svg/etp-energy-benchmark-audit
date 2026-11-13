@@ -1,0 +1,3 @@
+variable,benchmark_rows,equal_to_3_decimals_by_row_position,equal_to_3_decimals_in_order_allowing_skipped_source_days,source_days_skipped,first_source_day,last_source_day_used,pearson_r_in_order
+inflow,1382,1382,1382,none,2008-12-31,2012-10-12,1.0
+outflow,1382,867,1381,2011-05-01; 2011-05-02,2008-12-31,2012-10-14,

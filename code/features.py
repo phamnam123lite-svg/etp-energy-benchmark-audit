@@ -1,11 +1,14 @@
 """Feature sets, model factories and validation protocols shared by the modelling scripts."""
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import HistGradientBoostingRegressor, RandomForestRegressor
+from sklearn.compose import TransformedTargetRegressor
+from sklearn.ensemble import GradientBoostingRegressor, HistGradientBoostingRegressor, RandomForestRegressor, VotingRegressor
+from sklearn.neural_network import MLPRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import RidgeCV
 from sklearn.model_selection import GridSearchCV, KFold, TimeSeriesSplit
 from sklearn.pipeline import make_pipeline
+MODELS = ("Ridge", "RF", "HGB", "GBM", "MLP")
 from sklearn.preprocessing import StandardScaler
 from common import PROC, SEED, SPLIT_DATE
 
@@ -71,6 +74,16 @@ def make_model(kind, inner_cv):
     if kind == "HGB":   # handles missing values natively; tuned on the training data only
         base = HistGradientBoostingRegressor(max_iter=200, early_stopping=False, random_state=SEED)
         return GridSearchCV(base, HGB_GRID, cv=inner_cv, scoring="neg_root_mean_squared_error", n_jobs=2)
+    if kind == "GBM":   # classical gradient boosting machine (the "GBM" of Bagherzadeh et al., 2021)
+        return make_pipeline(SimpleImputer(strategy="median", add_indicator=True),
+                             GradientBoostingRegressor(n_estimators=300, learning_rate=0.05, max_depth=3, subsample=0.8,
+                                                       min_samples_leaf=10, random_state=SEED))
+    if kind == "MLP":   # deep feed-forward network: 3 hidden layers (64-64-32, ReLU), Adam, early stopping; mean of 5 seeds
+        nets = [(f"net{i}", MLPRegressor(hidden_layer_sizes=(64, 64, 32), alpha=1e-3, learning_rate_init=1e-3, max_iter=2000,
+                                         early_stopping=True, validation_fraction=0.15, n_iter_no_change=30, random_state=SEED + i))
+                for i in range(5)]
+        pipe = make_pipeline(SimpleImputer(strategy="median", add_indicator=True), StandardScaler(), VotingRegressor(nets))
+        return TransformedTargetRegressor(regressor=pipe, transformer=StandardScaler())
     raise ValueError(kind)
 
 

@@ -1,0 +1,23 @@
+,value
+days in electricity record,2588.0
+min daily grid import (MWh),116.64
+max daily generation (MWh),171.44
+min daily total supply (MWh),229.13
+days with generation > 50 % of total supply,2.0
+max generation share of total supply (%),52.715
+"(b) slope of d(grid) on d(generation), all days 2014-2021",-0.484
+(b) 95 % CI low,-0.603
+(b) 95 % CI high,-0.364
+(b) n,2587.0
+"(b') slope on d(generation), controlling for d(effluent flow)",-0.844
+(b') 95 % CI low,-0.914
+(b') 95 % CI high,-0.774
+(b') n,2017.0
+(c) coefficient of generation in total ~ flow + generation,0.109
+(c) 95 % CI low,0.026
+(c) 95 % CI high,0.193
+(c) n,2033.0
+generation-outage days (< 20 MWh),2.0
+mean change in TOTAL supply on outage days vs previous week (MWh),-102.855
+mean change in GRID import on outage days vs previous week (MWh),14.933
+mean generation on ordinary days (MWh),119.214

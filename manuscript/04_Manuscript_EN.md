@@ -1,20 +1,20 @@
 ---
 title: "Auditing a public benchmark for wastewater treatment plant energy prediction: misdated flows, an incomplete target and validation leakage in the Melbourne Eastern Treatment Plant dataset"
 author: "Viet Nam Tran — Faculty of Environment, Van Lang University, Ho Chi Minh City, Vietnam. Corresponding author: nampham123ntt@gmail.com"
-date: "Draft v2, 12 November 2026 — not peer reviewed"
+date: "Draft v3, 13 November 2026 — not peer reviewed"
 ---
 
 # Highlights
 
 - A public WWTP energy benchmark was checked against its primary source tables.
-- Both flow columns hold 2008–2012 values attached to 2014–2019 dates.
+- Its flow columns hold 2008–2012 values on 2014–2019 dates; all rows reproduced.
 - The target is grid import only; 30 % of electricity supply is generated on site.
-- With the file as distributed, no model beats a previous-day persistence forecast.
-- Re-dated flows cut hold-out RMSE by 36 %; effluent pumping carries the signal.
+- With the file as distributed, five model families do not beat persistence.
+- Same-day effluent pumping explains demand; day-ahead skill is only 15–17 %.
 
 # Abstract
 
-Open datasets are scarce in wastewater engineering, so the few that exist become benchmarks. One, a daily table for Melbourne's Eastern Treatment Plant (1,382 rows, 2014–2019), has been used in at least six machine-learning studies of energy prediction. We compared this file column by column with its primary open-data tables, then repeated the prediction task on a reconstructed, date-consistent table. Four defects were found. (1) The target is grid import only; on-site generation, 30 % of electricity supply, is absent. (2) Both flow columns are daily means from 2008–2012 attached by row position to dates in 2014–2019 (r = 0.999 by row, 0.12 by date). (3) 90 % of total-nitrogen and 30 % of BOD values are fills, not measurements. (4) Each date label is one day earlier than the day its energy value describes. With the file as distributed, no model beat a previous-day persistence forecast on a chronological hold-out (RMSE 43.5 against 40.7 MWh d⁻¹), yet shuffled cross-validation returned R² = 0.31. Re-dating the two flow columns alone lowered RMSE to 27.8 MWh d⁻¹; adding true calendar lags gave 24.0 MWh d⁻¹ for grid import and 19.0 MWh d⁻¹ for total supply (MAPE 3.7 %). Effluent flow, pumped through a 56-km outfall, carried almost all the signal; a two-parameter line in it matched gradient boosting. Spline augmentation applied before splitting reproduced a published 1.4 % MAPE that copying the previous row also attains. Conformal intervals covered 90–95 % of hold-out days against 78 % for a Gaussian band.
+Open datasets are scarce in wastewater engineering, so the few that exist become benchmarks. One, a daily table for Melbourne's Eastern Treatment Plant (1,382 rows, 2014–2019), has been used in at least six machine-learning energy-prediction studies. We compared this file column by column with its primary open-data tables, then repeated the prediction task on a reconstructed table. Four defects were found. (1) The target is grid import only; on-site generation, 30 % of electricity supply, is absent. (2) Both flow columns are daily means for 2008–2012 attached by row position to dates in 2014–2019; a simple rule reproduces all 1,382 inflow values exactly. (3) 90 % of total-nitrogen and 30 % of BOD values are fills, not measurements. (4) Each date label is one day earlier than the day its energy value describes. With the file as distributed, none of five model families beat a previous-day persistence forecast on a chronological hold-out (RMSE 43.5–44.6 against 40.7 MWh d⁻¹), yet shuffled cross-validation returned R² = 0.31. Re-dating the two flow columns alone lowered RMSE to 27.8 MWh d⁻¹. Same-day effluent flow, pumped through a 56-km outfall, explained most of the variation (RMSE 17.8–19.0 MWh d⁻¹ for total supply), but it is not known in advance: day-ahead forecasts reached only 31–32 MWh d⁻¹, 15–17 % better than persistence. Spline augmentation before splitting reproduced a published 1.4 % MAPE that copying the previous row also attains. A Gaussian residual band covered 78–86 % of hold-out days at a nominal 90 %.
 
 **Keywords:** wastewater treatment plant; energy consumption; benchmark dataset; data provenance; data leakage; conformal prediction; effluent pumping
 
@@ -24,7 +24,7 @@ Electricity is one of the largest operating costs of a wastewater treatment plan
 
 Full-scale operating data are rarely published, so the few open tables attract repeated use. A prominent example is the daily dataset for Melbourne Water's Eastern Treatment Plant (ETP) deposited on Mendeley Data (Bagherzadeh, 2021) and introduced by Bagherzadeh et al. (2021). It joins grid electricity, influent and effluent flow, influent quality and airport weather for 1,382 days between 2014 and 2019. The same file has since served as the test bed for comparisons of 15 to 23 ML models (Alali et al., 2022, 2023), deep learning with data augmentation (Harrou et al., 2023), a knowledge-enhanced graph network (Allen and Cordiner, 2025) and an interval type-2 neuro-fuzzy system (Khaled et al., 2026). Each study proposed a new model and reported lower errors than its predecessors.
 
-Three issues have not been examined in this line of work. First, none of the studies compared the file with the primary Melbourne Water tables from which it was assembled, so the meaning and integrity of its columns rest on a single join performed in 2021. Second, none reported a naive reference such as the previous day's value, although such references are the standard yardstick for forecast skill (Hyndman and Koehler, 2006). Third, reported errors span almost one order of magnitude, from a mean absolute percentage error (MAPE) of 10–15 % (Alali et al., 2023; Khaled et al., 2026) to 1.4 % (Harrou et al., 2023), without an explanation of the difference. General reviews have warned that data leakage and inadequate splitting are widespread in environmental ML (Zhu et al., 2023) and across ML-based science (Kapoor and Narayanan, 2023), and that data handling is the weak link of the wastewater "data pipeline" (Therrien et al., 2020). Temporal data in particular require validation schemes that respect time order (Bergmeir and Benítez, 2012; Roberts et al., 2017). To our knowledge, however, no study has audited a specific wastewater benchmark against its sources and quantified what the defects do to model performance.
+Three issues have not been examined in this line of work. First, none of the studies compared the file with the primary Melbourne Water tables from which it was assembled, so the meaning and integrity of its columns rest on a single join performed in 2021. Second, none reported a naive reference such as the previous day's value, although such references are the standard yardstick for forecast skill (Hyndman and Koehler, 2006). Third, reported errors span almost one order of magnitude, from a mean absolute percentage error (MAPE) of 10–15 % (Alali et al., 2023; Khaled et al., 2026) to 1.4 % (Harrou et al., 2023), without an explanation of the difference. General reviews have warned that data leakage and inadequate splitting are widespread in environmental ML (Zhu et al., 2023) and across ML-based science (Kapoor and Narayanan, 2023), and that data handling is the weak link of the wastewater "data pipeline" (Therrien et al., 2020). Temporal data in particular require validation schemes that respect time order (Bergmeir and Benítez, 2012; Roberts et al., 2017). Recent studies have begun to enforce temporally admissible inputs and leakage-aware pipelines for wastewater forecasting at other plants and for other targets (Mateos Bravo et al., 2026; Paepae, 2026). A screening of the 232 works that cite the benchmark or its three most-cited users found none that compares the file with its sources (Supplementary Note S1); to our knowledge, no study has audited a specific wastewater benchmark in this way and quantified what the defects do to model performance.
 
 This paper does so for the ETP file. The objectives were (i) to verify every column of the benchmark against the primary open-data tables; (ii) to rebuild a date-consistent table from those sources, including on-site generation; (iii) to quantify how the benchmark's defects and the validation protocol change apparent model skill relative to naive baselines; and (iv) to give calibrated prediction intervals and an engineering interpretation of what drives daily electricity use at this plant. Four hypotheses, formulated after the audit and before the prediction experiments, were tested. H1: with the file as distributed, ML models do not outperform a previous-day persistence forecast under chronological validation. H2: correcting the data, without changing the algorithm, yields a larger gain than any algorithm change. H3: total electricity supply (grid plus on-site generation) is more predictable from process variables than grid import. H4: shuffled validation and augmentation before splitting inflate apparent accuracy.
 
@@ -36,17 +36,17 @@ ETP, at Bangholme in south-east Melbourne, treats about 330 ML d⁻¹ (Bagherzad
 
 ## 2.2 Data sources
 
-Six files were used (Table S0 lists sizes and SHA-256 checksums).
+Six files were used (Supplementary Table S0 lists sizes and SHA-256 checksums).
 
 *Benchmark.* `Data-Melbourne_F.csv` (Bagherzadeh, 2021; CC BY 4.0), 1,382 rows and 20 columns: outflow, inflow, grid electricity (`total_grid`), ammonia, BOD, COD, total nitrogen (TN), ten weather fields and the date. The downloaded file matches the checksum published by the repository.
 
-*Primary tables.* Five feature services of the Melbourne Water Open Data Hub were retrieved in full on 12 November 2026 through their public REST interface: daily grid electricity by feeder with on-site generation (2,588 days, 1 January 2014 to 31 January 2021); daily influent quality (1,382 samples); daily effluent quality (1,716 records); and hourly influent and effluent flow from 2009 (91,993 and 93,529 records). The Victorian government data catalogue lists the electricity, flow and influent-quality tables under a CC BY 4.0 licence (DataVic, 2024a–d); the licence of the effluent-quality table, which is used here only for one descriptive indicator, was not confirmed. According to the catalogue, the effluent series is the hourly flow rate at the plant's outfall pump station, and influent samples are flow-weighted 24-h composites collected at 07:00 that relate to the preceding 24 h.
+*Primary tables.* Five feature services of the Melbourne Water Open Data Hub were retrieved in full on 12 November 2026 through their public REST interface: daily grid electricity by feeder with on-site generation (2,588 days, 1 January 2014 to 31 January 2021); daily influent quality (1,382 samples); daily effluent quality (1,716 records); and hourly influent and effluent flow from 2009 (91,993 and 93,529 records). The Victorian government data catalogue lists the electricity, flow and influent-quality tables under a CC BY 4.0 licence (DataVic, 2024a–d); the licence of the effluent-quality table, which is used here only for one descriptive indicator, was not confirmed. According to the catalogue, the two feeders plus generation give the plant's total electricity consumption, the effluent series is the hourly flow rate at the outfall pump station, and influent samples are flow-weighted 24-h composites collected at 07:00 that relate to the preceding 24 h.
 
 ## 2.3 Provenance audit
 
-Each benchmark column was compared with its source. For electricity, the benchmark value was matched to the sum of the two grid feeders. For flows, daily means of the hourly source series were compared with the benchmark values under three alignments: the same calendar date, the following date, and row position (the *i*-th benchmark row against the *i*-th day of the source series). For quality variables, rows were classed as measured (a value exists in the source and equals the benchmark) or filled (no source value). Weather fields have no primary table in this study; they were screened for impossible values and for seasonal and event plausibility.
+Each benchmark column was compared with its source. For electricity, the benchmark value was matched to the sum of the two grid feeders. For flows, daily aggregates of the hourly source series were compared with the benchmark values under several alignments: the same calendar date, the following date, and row position (the *i*-th benchmark row against the *i*-th day of the source series). Candidate aggregation rules (day boundary, statistic, treatment of duplicated and missing records) were then searched until the benchmark values were reproduced to the three decimals given in the file. For quality variables, rows were classed as measured (a value exists in the source and equals the benchmark) or filled (no source value). Weather fields have no primary table in this study; they were screened for impossible values and for seasonal and event plausibility.
 
-The electricity records are stamped at local midnight. To establish which 24 h each record covers, we correlated day-to-day changes in electricity with day-to-day changes in the mean of 24-h hourly-flow windows starting between −48 h and +36 h from the stamp.
+The electricity records are stamped at local midnight. To establish which 24 h each record covers, we correlated electricity with the mean of 24-h hourly-flow windows starting between −48 h and +36 h from the stamp.
 
 ## 2.4 Reconstructed table
 
@@ -56,15 +56,19 @@ All records were keyed to the local calendar day (Australia/Melbourne) that they
 
 *Targets.* Daily grid import and daily total supply (MWh d⁻¹).
 
-*Feature sets.* **BM**: the 16 predictors of the benchmark file plus an annual harmonic, as distributed. **BM-flowfix**: BM with the two flow columns replaced by correctly dated daily means, everything else unchanged. **RC**: reconstructed inputs (influent mean, maximum and standard deviation; effluent mean; measured NH₃-N, COD and BOD; seven weather fields; annual harmonic). **RC-noflow**: RC without the four flow variables. **LAG**: target on the previous day, seven days earlier and the mean of the previous seven days, plus the harmonic. **RC-dyn**: RC plus the LAG variables. **BM-rowlag**: BM plus the target of the previous *row*, which is how lagged energy can be built from the file alone; 23 % of rows are not preceded by the previous calendar day (gaps of 2–20 days).
+*Explanation and forecasting.* Two tasks are kept apart. In the *explanatory* task, as in the earlier studies, the inputs include measurements of the same day (flows, quality); such a model describes what drives electricity use but cannot be run before the day begins. In the *day-ahead forecasting* task, every input is known at 00:00 of the day to be predicted.
 
-*Models.* Ridge regression; random forest (Breiman, 2001; 300 trees); histogram gradient boosting (HGB; Friedman, 2001), tuned over 12 configurations by three-fold expanding-window validation inside the training data. All models used scikit-learn 1.9.1 (Pedregosa et al., 2011). Missing predictors were handled natively by HGB and by training-set median imputation with missingness indicators for the other two.
+*Feature sets on the benchmark rows (explanatory task).* **BM**: the 16 predictors of the benchmark file plus an annual harmonic, as distributed. **BM-flowfix**: BM with the two flow columns replaced by correctly dated daily means, everything else unchanged. **RC**: reconstructed inputs (influent mean, maximum and standard deviation; effluent mean; measured NH₃-N, COD and BOD; seven weather fields; annual harmonic). **RC-noflow**: RC without the four flow variables. **LAG**: target on the previous day, seven days earlier and the mean of the previous seven days, plus the harmonic. **RC-dyn**: RC plus the LAG variables. **BM-rowlag**: BM plus the target of the previous *row*, which is how lagged energy can be built from the file alone; 23 % of rows are not preceded by the previous calendar day (gaps of 2–20 days).
+
+*Feature sets on the complete daily calendar.* Electricity and hourly flows exist for every day, so a second table with all days from 8 January 2014 to 28 June 2019 was used to compare, on a regularly spaced series, **LAGS** (target lags and harmonic), **FORECAST** (LAGS plus the flows of the previous days) and **EXPLAIN** (LAGS plus the flows of the same day). Weather and influent quality exist only on sampling days and were not used in this table.
+
+*Models.* Five families were run with scikit-learn 1.9.1 (Pedregosa et al., 2011): ridge regression; random forest (Breiman, 2001; 300 trees); histogram gradient boosting (HGB), tuned over 12 configurations by three-fold expanding-window validation inside the training data; the classical gradient boosting machine (GBM; Friedman, 2001), the algorithm that performed best in Bagherzadeh et al. (2021); and a deep feed-forward network (MLP; three hidden layers of 64, 64 and 32 ReLU units, Adam, early stopping, mean of five initialisations). Recurrent networks and XGBoost/LightGBM were not available in the computing environment. Missing predictors were handled natively by HGB and by training-set median imputation with missingness indicators for the others.
 
 *Naive references.* Previous-day value (persistence), value seven days earlier, mean of the previous seven days, training mean and training monthly mean.
 
-*Validation.* The primary protocol is the chronological hold-out used by the earlier studies: benchmark labels up to 28 January 2018 for training (1,032 rows) and later rows for testing (346 rows). The same models were also evaluated by shuffled five-fold cross-validation and by five-fold rolling-origin validation, with tuning nested inside each fold.
+*Validation.* The primary protocol is the chronological hold-out used by the earlier studies: benchmark labels up to 28 January 2018 for training (1,032 rows) and later rows for testing (346 rows); on the complete calendar the same date separates 1,483 training days from 515 test days. Selected models were also evaluated by shuffled five-fold cross-validation and by five-fold rolling-origin validation, with tuning nested inside each fold.
 
-*Metrics and tests.* RMSE, MAE, MAPE, R², skill relative to persistence (1 − RMSE/RMSE of persistence) and MASE (Hyndman and Koehler, 2006). Forecasts were compared with the Diebold–Mariano test (Diebold and Mariano, 1995) with the small-sample correction of Harvey et al. (1997), and with 95 % moving-block bootstrap intervals (blocks of 14 rows, 2,000 resamples).
+*Metrics and tests.* RMSE, MAE, MAPE, R², skill relative to persistence (1 − RMSE/RMSE of persistence) and MASE (Hyndman and Koehler, 2006). Forecasts were compared with the Diebold–Mariano test (Diebold and Mariano, 1995) with the small-sample correction of Harvey et al. (1997). Because the benchmark rows are irregularly spaced, the long-run variance was estimated with a Bartlett kernel on the calendar distance between observations (bandwidth 14 days), and confidence intervals were obtained by resampling non-overlapping calendar blocks of 21 days (2,000 resamples). Four comparisons per target were designated as primary and their p-values were adjusted by the Holm procedure (Supplementary Table S6); all other p-values are descriptive.
 
 ## 2.6 Augmentation experiment
 
@@ -72,13 +76,17 @@ Harrou et al. (2023) enlarged the 1,382 rows ten-fold by cubic-spline interpolat
 
 ## 2.7 Prediction intervals
 
-Nominal 90 % intervals were built on the hold-out for HGB with RC and RC-dyn inputs by four methods: a Gaussian band of ±1.645 in-sample residual standard deviations; split conformal prediction (Angelopoulos and Bates, 2023), calibrated on the most recent 20 % of the training period; conformalized quantile regression (Romano et al., 2019); and adaptive conformal inference (Gibbs and Candès, 2021; step 0.02, trailing pool of 250 residuals). Coverage, mean width and the interval (Winkler) score are reported.
+Nominal 90 % intervals were built on the hold-out for HGB with RC and RC-dyn inputs by four methods: a Gaussian band of ±1.645 in-sample residual standard deviations; split conformal prediction (Angelopoulos and Bates, 2023), calibrated on the most recent 20 % of the training period; conformalized quantile regression (Romano et al., 2019); and adaptive conformal inference (Gibbs and Candès, 2021; step 0.02, trailing pool of 250 residuals). Coverage, mean width and the interval (Winkler) score are reported. Adaptive conformal inference adjusts its level after every observed miss, so its long-run coverage is close to nominal by construction; its coverage is reported for completeness and its width is the informative quantity.
 
-## 2.8 Interpretation and out-of-time check
+## 2.8 Interpretation, generation check and out-of-time check
 
-Permutation importance was computed on the hold-out for groups of related inputs, which avoids splitting importance among correlated columns. A two-parameter engineering baseline, E = a + b·Q, was fitted by least squares on the training period, with block-bootstrap intervals. Specific electricity use was computed per cubic metre of influent and per kilogram of COD removed. Finally, because the primary electricity table extends 19 months beyond the benchmark (to 31 January 2021), lag-only models trained on days up to 29 January 2018 were evaluated separately on that later window.
+Permutation importance was computed on the hold-out for groups of related inputs, which avoids splitting importance among correlated columns. A two-parameter engineering baseline, E = a + b·Q, was fitted by least squares on the training period, with block-bootstrap intervals. Specific electricity use was computed per cubic metre of influent and per kilogram of COD removed.
 
-All steps are scripted in Python 3.13; the full pipeline runs in about six minutes on two CPU cores.
+Treating grid import plus generation as the plant's demand assumes that no generated electricity is exported. Three implications were examined on the daily record: generation should never approach total supply; a change in generation should be offset by an opposite change in grid import (slope −1 in first differences, with Newey–West standard errors); and total supply should not depend on generation once effluent flow is accounted for.
+
+Finally, because the primary electricity table extends 19 months beyond the benchmark (to 31 January 2021), lag-only models trained on days up to 29 January 2018 were evaluated separately on that later window.
+
+All steps are scripted in Python 3.13; the full pipeline runs in about seven minutes on two CPU cores.
 
 # 3. Results
 
@@ -91,60 +99,76 @@ Table 1 summarises the audit.
 | Column(s) | Finding | Evidence |
 |---|---|---|
 | `total_grid` (target) | Equals feeder 1 + feeder 2, i.e. grid import. On-site generation is not included. | Exact match in 1,380 of 1,382 rows. Generation averages 115.8 MWh d⁻¹ against 275.1 MWh d⁻¹ of grid import (29.9 % of supply); r(grid, generation) = −0.33. |
-| `avg_inflow`, `avg_outflow` | Daily means of flows from 31 Dec 2008 to Oct 2012, attached by row position to dates in 2014–2019. | Inflow: r = 0.999 by row position over all 1,382 rows; r = 0.12 on the day described and 0.10–0.11 on the label date. Outflow: r = 0.999 by row for the first 700 rows, decaying thereafter; r = 0.20 by date. |
+| `avg_inflow`, `avg_outflow` | Daily means of flows from 31 Dec 2008 to Oct 2012, attached by row position to dates in 2014–2019. | Rule: mean of the hourly records of the *i*-th UTC day from 31 Dec 2008, omitting the record stamped 00:00 UTC. Inflow: all 1,382 of 1,382 values reproduced to three decimals. Outflow: 1,381 of 1,382 reproduced once two source days (1–2 May 2011) are skipped. Correlation with the flow of the day described: r = 0.12 (inflow), 0.14 (outflow). |
 | `TN` | 90.0 % of values are fills. | TN was measured on 138 of the 1,382 sample days. |
 | `BOD` | 30.4 % of values are fills. | All 420 filled values equal COD/2 exactly. |
 | `COD`, `Am` | 3.0 % and 0.1 % fills. | 42 and 1 rows without a source value. |
 | `SLP`, `VV`, `VG` | Not usable. | Pressure is 0 in 1,377 rows; visibility reaches 512 km (27 rows above 50 km); gust is 0 in 51.8 % of rows. |
-| date | Label is one day earlier than the local day described by the energy value. | Correlation of day-to-day changes between total supply and a 24-h effluent-flow window peaks at 0.88 when the window starts at the record stamp, and is −0.33 for the preceding 24 h (Fig. S1). |
+| date | Label is one day earlier than the local day described by the energy value. | Correlation of day-to-day changes between total supply and a 24-h effluent-flow window peaks at 0.88 when the window starts at the record stamp, and is −0.33 for the preceding 24 h (Supplementary Table S3, Fig. S1). |
 
 The target of every earlier study is therefore net grid import. Total supply rose from 375 MWh d⁻¹ in 2014 to 430 MWh d⁻¹ in 2020, while the generation share stayed near 30 %, with a dip to 27 % in 2017 (Fig. 1). Because generation varies independently of treatment load, it adds variance to grid import that process variables cannot explain; the variance of generation is 20 % of the variance of grid import.
 
 ![Daily grid import, on-site generation and total electricity supply at ETP, 2014–2021 (thin lines: daily values; thick lines: 30-day means). The benchmark file contains only the grid series up to mid-2019.](../results/figures/Fig1_grid_vs_total_supply.png){width=85%}
 
-The flow finding is the most consequential. The first benchmark row, labelled 1 January 2014, carries an inflow of 2.589 kL s⁻¹, which is the mean of the first eleven hourly records of the source series on 31 December 2008; the following rows track the following days of 2009 (Fig. 2c). The benchmark's inflow and outflow thus describe a period five years before the dates to which they are attached, with no physical relation to the electricity values beside them.
+The flow finding is the most consequential. The benchmark values are reproduced exactly by one rule: take the hourly source records of consecutive UTC days starting on 31 December 2008, omit the record stamped 00:00 UTC, average the rest, and write the result to consecutive rows (Supplementary Table S1). The first row, labelled 1 January 2014, is the mean of the eleven records of 31 December 2008; the last row, labelled 27 June 2019, is the inflow of 12 October 2012 (Fig. 2). For the outflow the same rule reproduces 1,381 of 1,382 values, the sequence omitting 1–2 May 2011. The omission of midnight records is the pattern left when timestamps without a time component are dropped or mis-parsed, and a positional join is what results when two tables are concatenated without matching on date. The benchmark's inflow and outflow thus describe a period five years before the dates to which they are attached, with no physical relation to the electricity values beside them.
 
-![Benchmark inflow against the source series: (a) on the day described by the row; (b) by row position from 31 December 2008; (c) the first 120 rows.](../results/figures/Fig2_flow_misdating.png){width=95%}
+![Benchmark inflow against the source series: (a) on the day described by the row; (b) reconstructed by the rule in the text; (c) the first 120 rows.](../results/figures/Fig2_flow_misdating.png){width=95%}
 
 ![Measured and filled influent-quality values in the benchmark file.](../results/figures/Fig3_filled_quality_values.png){width=50%}
 
 ## 3.2 Skill with the file as distributed
 
-On the chronological hold-out, persistence gave an RMSE of 40.7 MWh d⁻¹ (MAPE 10.5 %) for grid import (Table 2). No model trained on the BM inputs did better: HGB reached 43.5 MWh d⁻¹ (R² = −0.13), random forest 44.5 and ridge 44.6, none significantly different from persistence (Diebold–Mariano p = 0.17–0.38). Adding the previous row's energy brought HGB to 37.0 MWh d⁻¹, about 9 % better than persistence and no better than three lag variables alone (35.5 MWh d⁻¹). H1 is supported.
+On the chronological hold-out, persistence gave an RMSE of 40.7 MWh d⁻¹ (MAPE 10.5 %) for grid import (Table 2). No model trained on the BM inputs did better: the five families gave 43.5–44.6 MWh d⁻¹ (R² between −0.19 and −0.13), none distinguishable from persistence (Diebold–Mariano p = 0.21–0.42; Holm-adjusted p = 0.84 for the primary test). For total supply the same inputs gave 39.1–41.1 MWh d⁻¹ against 40.3 for persistence (p = 0.69–0.93). Adding the previous row's energy brought HGB to 37.0 MWh d⁻¹, 9 % better than persistence and no better than three lag variables alone (35.5 MWh d⁻¹). H1 is supported.
 
 These figures are close to those published for the same split: RMSE 33.9–39.8 MWh d⁻¹ with R² of 0.00–0.18 (Bagherzadeh et al., 2021), 37.1–41.4 MWh d⁻¹ (Alali et al., 2023), 37.8 MWh d⁻¹ without augmentation (Harrou et al., 2023) and 35.3–51.5 MWh d⁻¹ (Khaled et al., 2026). The earlier studies removed about 5 % of rows as outliers, so the comparison is approximate, but the published errors sit in the range that a persistence forecast attains.
 
-**Table 2.** Chronological hold-out (346 rows). HGB unless stated; 95 % block-bootstrap interval for RMSE in brackets; skill is relative to persistence.
+**Table 2.** Chronological hold-out on the benchmark rows (346 rows; explanatory task). HGB unless stated; 95 % calendar-block bootstrap interval for RMSE in brackets; skill is relative to persistence. All model families are in Supplementary Table S5.
 
 | Inputs | Grid import: RMSE (MWh d⁻¹) | MAPE (%) | R² | Skill (%) | Total supply: RMSE (MWh d⁻¹) | MAPE (%) | R² | Skill (%) |
 |---|---|---|---|---|---|---|---|---|
-| Persistence | 40.7 [36.3, 45.5] | 10.5 | 0.01 | 0 | 40.3 [36.0, 44.5] | 7.3 | −0.16 | 0 |
-| Mean of previous 7 d | 39.7 | 11.3 | 0.06 | 2 | 35.9 | 7.1 | 0.08 | 11 |
-| BM (file as distributed) | 43.5 [37.1, 51.0] | 12.7 | −0.13 | −7 | 39.1 [33.6, 44.2] | 7.8 | −0.10 | 3 |
+| Persistence | 40.7 [35.8, 45.1] | 10.5 | 0.01 | 0 | 40.3 [36.1, 44.2] | 7.3 | −0.16 | 0 |
+| BM (file as distributed) | 43.5 [37.0, 50.4] | 12.7 | −0.13 | −7 | 39.1 [34.2, 44.3] | 7.8 | −0.10 | 3 |
+| BM, GBM | 43.8 | 12.8 | −0.15 | −8 | 39.8 | 8.0 | −0.13 | 1 |
+| BM, deep MLP | 43.9 | 12.8 | −0.15 | −8 | 40.0 | 7.9 | −0.15 | 1 |
 | BM-rowlag | 37.0 | 10.5 | 0.18 | 9 | 35.3 | 7.0 | 0.11 | 12 |
-| BM-flowfix | 27.8 [23.1, 33.3] | 7.7 | 0.54 | 32 | 23.3 [18.4, 28.5] | 4.4 | 0.61 | 42 |
+| BM-flowfix | 27.8 [22.5, 33.0] | 7.7 | 0.54 | 32 | 23.3 [17.9, 29.1] | 4.4 | 0.61 | 42 |
 | RC-noflow | 45.2 | 13.3 | −0.22 | −11 | 40.8 | 8.2 | −0.19 | −1 |
-| RC | 28.0 [23.1, 33.6] | 7.7 | 0.53 | 31 | 22.7 [17.6, 28.1] | 4.2 | 0.63 | 44 |
+| RC | 28.0 [22.5, 33.3] | 7.7 | 0.53 | 31 | 22.7 [17.1, 28.7] | 4.2 | 0.63 | 44 |
 | LAG | 35.5 | 10.0 | 0.25 | 13 | 33.1 | 6.5 | 0.21 | 18 |
-| RC-dyn | 24.0 [20.5, 28.1] | 6.6 | 0.66 | 41 | 19.0 [16.4, 22.3] | 3.7 | 0.74 | 53 |
+| RC-dyn | 24.0 [20.3, 28.1] | 6.6 | 0.66 | 41 | 19.0 [16.1, 22.5] | 3.7 | 0.74 | 53 |
 | RC-dyn, ridge | 24.2 | 6.6 | 0.65 | 41 | 18.6 | 3.6 | 0.75 | 54 |
 | RC-dyn, random forest | 24.1 | 6.9 | 0.65 | 41 | 18.7 | 3.7 | 0.75 | 54 |
+| RC-dyn, GBM | 23.4 | 6.6 | 0.67 | 43 | 17.8 | 3.5 | 0.77 | 56 |
+| RC-dyn, deep MLP | 26.0 | 7.1 | 0.59 | 36 | 22.5 | 4.0 | 0.64 | 44 |
 
 ## 3.3 Effect of correcting the data
 
-Replacing only the two misdated flow columns (BM-flowfix) lowered the HGB hold-out RMSE for grid import from 43.5 to 27.8 MWh d⁻¹, a change of −15.7 MWh d⁻¹ (95 % interval −20.1 to −11.1; Diebold–Mariano p < 0.001), and raised R² from −0.13 to 0.54 (Fig. 4a). The fully reconstructed inputs gave the same result (28.0 MWh d⁻¹), and removing the flows from them returned the error to the level of the benchmark file (45.2 MWh d⁻¹). The other corrections — dropping the filled TN, the defective weather fields and the COD/2 fills — had no measurable effect on accuracy; their importance lies in interpretation (Section 4).
+Replacing only the two misdated flow columns (BM-flowfix) lowered the HGB hold-out RMSE for grid import from 43.5 to 27.8 MWh d⁻¹, a change of −15.7 MWh d⁻¹ (95 % interval −19.4 to −11.1; Holm-adjusted p < 0.001), and raised R² from −0.13 to 0.54 (Fig. 4a). For total supply the change was −15.9 MWh d⁻¹ (−20.2 to −10.0). The fully reconstructed inputs gave the same result (28.0 MWh d⁻¹), and removing the flows from them returned the error to the level of the benchmark file (45.2 MWh d⁻¹). The other corrections — dropping the filled TN, the defective weather fields and the COD/2 fills — had no measurable effect on accuracy; their importance lies in interpretation (Section 4).
 
-With calendar-true lags added (RC-dyn), RMSE fell to 24.0 MWh d⁻¹ for grid import and 19.0 MWh d⁻¹ for total supply, 41 % and 53 % better than persistence. Among algorithms, the spread was small: for RC-dyn the three model families lay within 0.2 MWh d⁻¹ (grid) and 0.4 MWh d⁻¹ (total) of each other, against a 13–16 MWh d⁻¹ gain from the data correction. H2 is supported.
+With calendar-true lags added (RC-dyn), RMSE fell to 23.4–24.2 MWh d⁻¹ for grid import and 17.8–19.0 MWh d⁻¹ for total supply across ridge, random forest, HGB and GBM, 41–43 % and 53–56 % better than persistence. The deep network was the weakest family on the RC and RC-dyn inputs (26.0 and 22.5 MWh d⁻¹ for RC-dyn), as is common for small tabular samples. The spread among the four other families (0.8 and 1.2 MWh d⁻¹) is small beside the 13–16 MWh d⁻¹ gained from the data correction. H2 is supported.
 
-Total supply was predicted better than grid import in every configuration that contained real signal (R² 0.63 against 0.53 for RC; 0.74 against 0.66 for RC-dyn; MAPE 3.7 % against 6.6 %), which supports H3. Without the mass-balance screen on the effluent meter, RC-dyn gave 25.3 (grid) and 22.5 MWh d⁻¹ (total); the differences from the screened results were not significant (p = 0.20 and 0.15), and none of the conclusions changes. Pairing each day with the composite sample collected the next morning (available for 1,036 of the 1,378 rows) changed the HGB hold-out RMSE by +0.1 to +0.6 MWh d⁻¹ (p = 0.08–0.54).
+Total supply was fitted better than grid import in every configuration that contained real signal (R² 0.63 against 0.53 for RC; 0.74 against 0.66 for RC-dyn; MAPE 3.7 % against 6.6 %), which supports H3. Without the mass-balance screen on the effluent meter, RC-dyn gave 25.3 (grid) and 22.5 MWh d⁻¹ (total); the differences from the screened results were not significant (p = 0.25 and 0.23), and none of the conclusions changes. Pairing each day with the composite sample collected the next morning (available for 1,036 of the 1,378 rows) changed the HGB hold-out RMSE by +0.1 to +0.6 MWh d⁻¹ (p = 0.10–0.55).
 
-![Re-evaluation summary. (a) Hold-out RMSE by input set, with 95 % intervals; dashed lines mark persistence. (b) R² of the same models under three validation protocols. (c) Test MAPE with and without ten-fold spline augmentation. (d) Observed and predicted total supply over the last 150 hold-out rows.](../results/figures/Fig4_reevaluation_summary.png){width=95%}
+![Re-evaluation summary. (a) Hold-out RMSE by input set, with 95 % intervals; dashed lines mark persistence. (b) R² of the same models under three validation protocols. (c) Test MAPE with and without ten-fold spline augmentation. (d) Observed and fitted total supply over the last 150 hold-out rows.](../results/figures/Fig4_reevaluation_summary.png){width=95%}
 
-## 3.4 Effect of the validation protocol
+## 3.4 Same-day explanation versus day-ahead forecasting
 
-With the BM inputs, shuffled five-fold cross-validation gave R² = 0.31 for grid import, whereas rolling-origin validation gave −0.04 and the chronological hold-out −0.13 (Table 3, Fig. 4b). The shuffled estimate credits the models with interpolating slow level changes between neighbouring days, which is unavailable in operation. For inputs that contain real signal the gap narrows but remains (RC: 0.63 shuffled against 0.48–0.53 in time order).
+The models in Table 2 use the flow of the day they describe. On the complete daily calendar, where the two tasks can be separated on a regular series (515 test days), the difference is large (Table 3). With same-day flows, the five families reached 17.9–20.7 MWh d⁻¹ for total supply (MAPE 3.5–3.8 %, R² 0.70–0.77). With only information available before the day begins, they reached 31.1–31.8 MWh d⁻¹ (MAPE 6.1–6.2 %, R² 0.28–0.32), which is 15–17 % better than persistence and about 1 MWh d⁻¹ better than target lags alone. The gap between the two tasks was 10–14 MWh d⁻¹ for total supply and 8–11 MWh d⁻¹ for grid import (p < 0.001 for every family). Split-conformal 90 % intervals for the day-ahead forecasts covered 87–90 % of test days with widths of 94–98 MWh d⁻¹ for total supply, about ±12 % of mean demand, and 107–111 MWh d⁻¹ for grid import.
 
-**Table 3.** R² of HGB for grid import under three validation protocols.
+**Table 3.** Chronological hold-out on the complete daily calendar (515 test days). Range over the five model families.
+
+| Task and inputs | Grid import: RMSE (MWh d⁻¹) | MAPE (%) | R² | Skill (%) | Total supply: RMSE (MWh d⁻¹) | MAPE (%) | R² | Skill (%) |
+|---|---|---|---|---|---|---|---|---|
+| Persistence | 38.2 | 10.2 | 0.11 | 0 | 37.6 | 6.9 | 0.00 | 0 |
+| Target lags only | 33.2–33.8 | 9.4–9.6 | 0.30–0.33 | 11–13 | 31.9–32.5 | 6.3–6.4 | 0.25–0.28 | 13–15 |
+| Day-ahead forecast: lags + flows of previous days | 32.0–33.1 | 9.2–9.4 | 0.33–0.37 | 13–16 | 31.1–31.8 | 6.1–6.2 | 0.28–0.32 | 15–17 |
+| Explanation: lags + flows of the same day | 22.2–24.1 | 6.2–6.6 | 0.64–0.70 | 37–42 | 17.9–20.7 | 3.5–3.8 | 0.70–0.77 | 45–52 |
+
+## 3.5 Effect of the validation protocol
+
+With the BM inputs, shuffled five-fold cross-validation gave R² = 0.31 for grid import, whereas rolling-origin validation gave −0.04 and the chronological hold-out −0.13 (Table 4, Fig. 4b). The shuffled estimate credits the models with interpolating slow level changes between neighbouring days, which is unavailable in operation. For inputs that contain real signal the gap narrows but remains (RC: 0.63 shuffled against 0.48–0.53 in time order).
+
+**Table 4.** R² of HGB for grid import under three validation protocols (explanatory task; all metrics in Supplementary Table S8).
 
 | Inputs | Shuffled 5-fold | Rolling origin | Chronological hold-out |
 |---|---|---|---|
@@ -153,9 +177,9 @@ With the BM inputs, shuffled five-fold cross-validation gave R² = 0.31 for grid
 | RC | 0.63 | 0.48 | 0.53 |
 | RC-dyn | 0.73 | 0.68 | 0.66 |
 
-The augmentation experiment gave a sharper result (Table 4, Fig. 4c). Interpolating the whole table ten-fold before the chronological split and feeding the model the previous (interpolated) row produced a test MAPE of 1.35 %, RMSE of 4.9 MWh d⁻¹ and R² of 0.985. The values reported for this procedure by Harrou et al. (2023) are 1.36 %, 5.8 MWh d⁻¹ and 0.978. Copying the previous interpolated row, with no model, gave 1.29 %. When the split preceded augmentation and the untouched test rows were scored, MAPE was 11.6 %, the same as copying the previous row of the file. The low error is therefore a property of the smooth interpolant between adjacent real observations and carries no information on predictive skill. H4 is supported.
+The augmentation experiment gave a sharper result (Table 5, Fig. 4c). Interpolating the whole table ten-fold before the chronological split and feeding the model the previous (interpolated) row produced a test MAPE of 1.35 %, RMSE of 4.9 MWh d⁻¹ and R² of 0.985. The values reported for this procedure by Harrou et al. (2023) are 1.36 %, 5.8 MWh d⁻¹ and 0.978. Copying the previous interpolated row, with no model, gave 1.29 %. When the split preceded augmentation and the untouched test rows were scored, MAPE was 11.6 %, the same as copying the previous row of the file. The low error is therefore a property of the smooth interpolant between adjacent real observations and carries no information on predictive skill. H4 is supported.
 
-**Table 4.** Ten-fold cubic-spline augmentation, grid import, BM inputs with lagged energy (HGB).
+**Table 5.** Ten-fold cubic-spline augmentation, grid import, BM inputs with lagged energy (HGB).
 
 | Order of operations | Test rows | MAPE (%) | RMSE (MWh d⁻¹) | R² | MAPE of copying the previous row (%) |
 |---|---|---|---|---|---|
@@ -163,11 +187,11 @@ The augmentation experiment gave a sharper result (Table 4, Fig. 4c). Interpolat
 | Augment all rows, then split | 3,460 | 1.35 | 4.9 | 0.985 | 1.29 |
 | Split, then augment training rows only | 346 | 11.6 | 43.1 | −0.11 | 11.6 |
 
-## 3.5 Prediction intervals
+## 3.6 Prediction intervals
 
-The Gaussian band covered 78 % (total supply) and 86 % (grid import) of hold-out days at a nominal 90 %, and less over some stretches of the hold-out (Fig. 5), because in-sample residuals of a flexible model understate out-of-sample error. Split conformal intervals were conservative (93.4–95.4 %), conformalized quantile regression was close to nominal (89.0–95.1 %), and adaptive conformal inference held 89.9–91.0 % in all four cases with the narrowest valid intervals (57 MWh d⁻¹ mean width for total supply with RC-dyn, about ±7 % of the mean).
+The Gaussian band covered 78 % (total supply) and 86 % (grid import) of hold-out days at a nominal 90 % (Table 6, Fig. 5), because in-sample residuals of a flexible model understate out-of-sample error. Split conformal intervals, calibrated on a held-out block, erred on the wide side (93.4–95.4 % coverage), and conformalized quantile regression lay between 89.0 and 95.1 %. Adaptive conformal inference returned 89.9–91.0 %, as expected from its design; its value here is that the intervals were narrower than the static conformal ones at the same level (57 against 68 MWh d⁻¹ for total supply with RC-dyn). These intervals belong to the explanatory task; the day-ahead intervals in Section 3.4 are 40–70 % wider.
 
-**Table 5.** Nominal 90 % intervals on the hold-out, HGB with RC-dyn inputs.
+**Table 6.** Nominal 90 % intervals on the hold-out, HGB with RC-dyn inputs (explanatory task).
 
 | Method | Grid: coverage (%) | Mean width (MWh d⁻¹) | Total: coverage (%) | Mean width (MWh d⁻¹) |
 |---|---|---|---|---|
@@ -178,7 +202,7 @@ The Gaussian band covered 78 % (total supply) and 86 % (grid import) of hold-out
 
 ![Top: hold-out predictions of total supply with 90 % adaptive conformal intervals. Bottom: coverage over the trailing 60 rows for three interval methods.](../results/figures/Fig5_prediction_intervals.png){width=85%}
 
-## 3.6 What drives daily electricity use
+## 3.7 What drives daily electricity use
 
 Permuting effluent flow raised the hold-out RMSE by 24.4 MWh d⁻¹ for total supply and 19.8 MWh d⁻¹ for grid import; no other input group contributed more than 2.1 MWh d⁻¹ (influent flow 2.1, influent quality 1.2, weather 0.3, season 0.5 for total supply; Fig. 6a). The response to effluent flow is close to linear over the observed range (Fig. 6b). The engineering baseline fitted on the training period was
 
@@ -188,67 +212,72 @@ with E in MWh d⁻¹ and Q_eff in ML d⁻¹, so that the slope is in kWh m⁻³.
 
 Median specific electricity use was 1.04 kWh m⁻³ of influent on the basis of total supply and 0.72 kWh m⁻³ on the basis of grid import (1.26 against 0.88 kWh per kg COD removed). An indicator computed from the benchmark target would understate the plant's electricity intensity by 31 % (Fig. 6c).
 
+*Is total supply the plant's demand?* Over the 2,588 days of the record, grid import never fell below 117 MWh d⁻¹ and generation exceeded half of supply on only two days (maximum 53 %), so there was no day on which the plant could have been a net exporter. A change in generation was offset by an opposite change in grid import of 0.84 MWh per MWh (95 % interval 0.77–0.91) once the change in effluent flow was accounted for, and total supply rose by 0.11 MWh (0.03–0.19) per MWh of generation (Supplementary Table S12). The offset is therefore close to, but statistically below, one-for-one. Measurement error in the generation series, auxiliary consumption of the power station, or common drivers of generation and demand would each produce this pattern; small exports cannot be excluded from these data. Total supply is used here as the publisher defines it, as the best available measure of demand.
+
 ![(a) Grouped permutation importance on the hold-out. (b) Partial dependence on effluent and influent flow. (c) Median specific electricity use by year.](../results/figures/Fig6_drivers_and_specific_energy.png){width=95%}
 
-## 3.7 Out-of-time check
+## 3.8 Out-of-time check
 
-For the 583 days after the benchmark ends (29 June 2019 to 31 January 2021), only electricity is published. A ridge model on lagged values, trained on data up to January 2018, kept its advantage over persistence in this later window (grid import: skill 11.8 % inside the benchmark period and 12.8 % after it; total supply: 13.9 % and 13.4 %; all p < 0.001), and its split-conformal 90 % intervals covered 89.7 % (grid) and 86.1 % (total) of days. The modest size of this skill confirms that most of the predictability reported in Section 3.3 comes from the flow information, not from autocorrelation (lag-1 autocorrelation is 0.68 for grid import).
+For the 583 days after the benchmark ends (29 June 2019 to 31 January 2021), only electricity is published. A ridge model on lagged values, trained on data up to January 2018, kept its advantage over persistence in this later window (grid import: skill 11.8 % inside the benchmark period and 12.8 % after it; total supply: 13.9 % and 13.4 %; all p < 0.001), and its split-conformal 90 % intervals covered 89.7 % (grid) and 86.1 % (total) of days. The modest size of this skill is consistent with Section 3.4: without same-day flow, forecasts improve on persistence by 12–17 % (lag-1 autocorrelation is 0.68 for grid import).
 
 # 4. Discussion
 
-**The benchmark carried almost no usable signal.** In the file as distributed, the only inputs with a physical link to the dated electricity values were ammonia, measured COD, about two-thirds of the BOD values, a tenth of the TN values and the previous day's weather. These proved to be weak predictors: the reconstructed inputs without flow did no better than the training mean. This explains why six studies using increasingly elaborate models reported R² values near zero or errors near 10–13 % on the chronological split: they were, in effect, competing to model noise around a slowly drifting level. It also explains why lagged energy appeared so valuable in those studies (Alali et al., 2023; Harrou et al., 2023), since it was the one informative input.
+**The benchmark carried almost no usable signal.** In the file as distributed, the only inputs with a physical link to the dated electricity values were ammonia, measured COD, about two-thirds of the BOD values, a tenth of the TN values and the previous day's weather. These proved to be weak predictors: the reconstructed inputs without flow did no better than the training mean. This explains why six studies using increasingly elaborate models reported R² values near zero or errors near 10–15 % on the chronological split: they were, in effect, competing to model noise around a slowly drifting level. It also explains why lagged energy appeared so valuable in those studies (Alali et al., 2023; Harrou et al., 2023), since it was the one informative input.
 
 **Earlier feature rankings need re-reading.** TN was reported as the most influential variable (Bagherzadeh et al., 2021), yet nine in ten TN values are fills whose rule is undocumented, and inflow was ranked among the top variables although the column belongs to another period. Importance scores computed from training-set impurity can assign weight to such columns; in our chronological evaluation neither improved predictions. We suggest that process conclusions drawn from the benchmark (for example, that nitrogen load governs energy use at ETP) should not be relied upon.
 
-**Effluent pumping, not biological load, governs day-to-day variation.** Once correctly dated, effluent flow alone explained 61 % of hold-out variance in total supply, and influent flow almost none. This is consistent with the plant layout: the effluent series is metered at the outfall pump station (DataVic, 2024c), which lifts treated effluent into a 56-km pipeline, and storage on site decouples the hourly discharge from the hourly inflow. The slope of 0.43 kWh m⁻³ is of the order expected for a long transfer main; the base load of about 240 MWh d⁻¹ covers aeration, tertiary treatment and solids handling, whose day-to-day variation was not resolved by influent NH₃-N, COD or BOD. The practical reading is that short-term electricity forecasts at this plant are, to first order, forecasts of the effluent pumping schedule, which the operator controls. Variables that would resolve the remaining 25–35 % of variance (blower air flow, dissolved-oxygen set-points, ozone dose, sludge processing) are not in the open tables.
+**Effluent pumping, not biological load, governs day-to-day variation.** Once correctly dated, effluent flow alone explained 61 % of hold-out variance in total supply, and influent flow almost none. This is consistent with the plant layout: the effluent series is metered at the outfall pump station (DataVic, 2024c), which lifts treated effluent into a 56-km pipeline, and storage on site decouples the hourly discharge from the hourly inflow. The slope of 0.43 kWh m⁻³ is of the order expected for a long transfer main; the base load of about 240 MWh d⁻¹ covers aeration, tertiary treatment and solids handling, whose day-to-day variation was not resolved by influent NH₃-N, COD or BOD. Variables that would resolve the remaining 25–35 % of variance (blower air flow, dissolved-oxygen set-points, ozone dose, sludge processing) are not in the open tables.
 
-**The target matters for both prediction and benchmarking.** Grid import is what the utility pays for, and it is a legitimate target for procurement. It is, however, the difference between demand and on-site generation, and generation depends on digester gas production and engine availability. Models that aim to explain energy use from treatment variables should use total supply; models of grid import should include generation or its drivers. Intensity indicators built on the benchmark target are about 30 % too low and are not comparable with plants that have no generation (Longo et al., 2016; Gu et al., 2017).
+**Explanation is not forecasting.** Effluent flow is measured at the pumps that consume the electricity, during the same day. A model given that flow describes the load; it does not predict it. When only earlier days were available to the models, errors rose from 18–21 to 31–32 MWh d⁻¹ for total supply, and previous-day flows added about 1 MWh d⁻¹ to what the target's own history provides. The benchmark task as posed in the literature, with same-day inputs, is therefore an explanatory task, and accuracies reported for it should not be read as forecasting accuracies. A useful day-ahead forecast at this plant would need the planned discharge schedule, which the operator sets and which is not published; the size of the gap (10–14 MWh d⁻¹) indicates how much such information could be worth.
+
+**The target matters for both prediction and benchmarking.** Grid import is what the utility pays for, and it is a legitimate target for procurement. It is, however, the difference between demand and on-site generation, and generation depends on digester gas production and engine availability. Models that aim to explain energy use from treatment variables should use total supply; models of grid import should include generation or its drivers. The offset between generation and grid import was 0.84 for 1, not exactly one-for-one, so total supply is itself an approximation of demand whose error we could not resolve with the open data. Intensity indicators built on the benchmark target are about 30 % too low and are not comparable with plants that have no generation (Longo et al., 2016; Gu et al., 2017).
 
 **Simple references would have exposed the problem.** A previous-day forecast, a two-parameter line and a time-ordered split are each a few lines of code. Had they been reported alongside the first models, the absence of skill would have prompted a look at the inputs. The augmentation case is instructive for another reason: the 1.4 % MAPE is reproduced by copying the previous interpolated row, so any model given that row will appear excellent. Interpolated points are functions of their real neighbours on both sides, and a chronological split does not separate them. These observations agree with general accounts of leakage (Kapoor and Narayanan, 2023; Zhu et al., 2023) and extend them with a quantified wastewater example.
 
-**Uncertainty should be validated, not asserted.** The band used with the original study, a normal-theory interval on residuals, was not checked for coverage. In our re-evaluation a comparable band under-covered by 4–12 points, whereas conformal methods, which need only a held-out calibration set, were close to nominal and remained so under the gradual upward drift of demand when updated online.
+**Uncertainty should be validated, not asserted.** The band used with the original study, a normal-theory interval on residuals, was not checked for coverage. In our re-evaluation a comparable band under-covered by 4–12 points. Intervals calibrated on held-out data did not under-cover, at the price of greater width, and for day-ahead use they were ±12 % of mean demand. The practical point is modest: coverage should be measured on unseen days, and intervals should be reported for the task that will actually be performed.
 
 **Recommendations.** For dataset publishers: deposit the join script with the table; keep measured and filled values distinguishable; state the time zone and whether a daily stamp marks the start or end of the day. For users: verify a sample of rows against the primary source, report persistence and a physically motivated baseline, split in time before any transformation that mixes rows, and report interval coverage. For this dataset: use the reconstructed table released with this paper, or rebuild it from the primary tables with the scripts provided.
 
 # 5. Practical implications
 
-For Melbourne Water and similar utilities, a forecast of next-day total supply within about ±7 % (90 % interval) is attainable from the planned effluent discharge and recent demand alone, without influent quality measurements. For researchers, the reconstructed ETP table offers a small but sound test bed with a documented difficulty level: persistence RMSE 40 MWh d⁻¹, flow-line baseline 23 MWh d⁻¹, best dynamic model 19 MWh d⁻¹ for total supply. New methods should be judged by how far they move beyond these three reference points on the chronological split.
+For Melbourne Water and similar utilities, the open data support a day-ahead forecast of total supply with an RMSE of about 31 MWh d⁻¹ and a 90 % interval of about ±12 %, only modestly better than repeating yesterday's value; the planned effluent discharge is the missing input that could close much of the gap to the 18–19 MWh d⁻¹ reached with same-day flow. For researchers, the reconstructed ETP table offers a small but sound test bed with documented reference points for total supply: persistence 38–40 MWh d⁻¹; day-ahead forecast 31 MWh d⁻¹; two-parameter line in same-day effluent flow 23 MWh d⁻¹; best explanatory model 18 MWh d⁻¹. New methods should state which of the two tasks they address and be judged against the corresponding reference on the chronological split.
 
 # 6. Limitations
 
-The study concerns one plant and one benchmark; the prevalence of similar defects elsewhere is unknown. Weather fields could not be compared with a primary meteorological record and were only screened. We infer the row-position join from the data; the original processing script was not available, and the primary tables may have been revised since the benchmark was compiled in 2021, although the flow correspondence (r = 0.999 over 1,382 rows) leaves little room for an alternative explanation. Influent quality contributed little under either pairing of composite samples with days, so its small importance is not an artefact of sample timing, but it may reflect the absence of load variables at sub-daily resolution. The mass-balance screen on the effluent meter was defined after the anomaly was noticed in hold-out predictions; results without it are reported. Only models available in scikit-learn were run, and no deep networks; since the conclusions concern data and validation, we do not expect them to depend on this choice, but it was not tested. Hyper-parameter search was deliberately small. The emulation of the augmentation procedure follows a published description and may differ in detail from the original implementation. The authors of the benchmark and of the cited studies have not yet been consulted and should be given the opportunity to respond before publication.
+The study concerns one plant and one benchmark; the prevalence of similar defects elsewhere is unknown. The reconstruction rule for the flow columns is inferred from the data: it reproduces 1,382 of 1,382 inflow values and 1,381 of 1,382 outflow values, but the original processing script was not available and the cause of the positional join is a conjecture. The authors of the benchmark and of the cited studies have not yet been consulted and should be given the opportunity to respond before publication. Weather fields could not be compared with a primary meteorological record and were only screened. Total supply approximates demand; the generation offset of 0.84 leaves a part that the open data cannot attribute. Day-ahead forecasts used no weather forecast and no operating plan, so they are a lower bound on what the operator could achieve. The mass-balance screen on the effluent meter was defined after the anomaly was noticed in hold-out predictions; results without it are reported. Influent quality contributed little under either pairing of composite samples with days, so its small importance is not an artefact of sample timing, but it may reflect the absence of load variables at sub-daily resolution. The deep model was a feed-forward network; recurrent networks, XGBoost, LightGBM and SHAP were not available in the computing environment, and the hyper-parameter searches were deliberately small. Since the conclusions concern data and validation, and five families agree, we do not expect them to depend on this, but it was not tested. Hypotheses were formulated after the audit and were not pre-registered; apart from the eight Holm-adjusted primary tests, p-values are descriptive. The emulation of the augmentation procedure follows a published description and may differ in detail from the original implementation. Forward-citation screening used OpenAlex and titles only.
 
 # 7. Conclusions
 
-1. The public ETP energy benchmark differs from its primary sources in four ways: an incomplete target, misdated flow columns, undisclosed fills and a one-day label offset.
-2. With the file as distributed, no tested model outperforms a previous-day persistence forecast under chronological validation; shuffled validation and augmentation before splitting conceal this.
-3. Correcting the flow dates, without changing the algorithm, reduces the hold-out RMSE for grid import by 36 %; with calendar-true lags, total supply is predicted with an RMSE of 19 MWh d⁻¹ (MAPE 3.7 %), 53 % better than persistence.
-4. Effluent pumping explains most of the predictable day-to-day variation; a two-parameter line in effluent flow equals gradient boosting on 16 inputs.
-5. Conformal intervals attain their nominal coverage on unseen days, whereas a Gaussian residual band does not.
+1. The public ETP energy benchmark differs from its primary sources in four ways: an incomplete target, flow columns that belong to 2008–2012 (reproduced exactly by a simple rule), undisclosed fills and a one-day label offset.
+2. With the file as distributed, none of five model families outperforms a previous-day persistence forecast under chronological validation; shuffled validation and augmentation before splitting conceal this.
+3. Correcting the flow dates, without changing the algorithm, reduces the hold-out RMSE for grid import by 36 %; the choice among ridge, random forest and two boosting methods changes it by about 1 MWh d⁻¹.
+4. Same-day effluent pumping explains most of the day-to-day variation (RMSE 18–19 MWh d⁻¹ for total supply), and a two-parameter line in effluent flow nearly matches the learned models; this is explanation, not forecasting.
+5. True day-ahead forecasts from the open data reach 31–32 MWh d⁻¹, 15–17 % better than persistence, with 90 % intervals of about ±12 %.
+6. A Gaussian residual band under-covers on unseen days; intervals calibrated on held-out data do not.
 
 # Data availability statement
 
-The benchmark file is available from Mendeley Data (https://doi.org/10.17632/pprkvz3vbd.1, CC BY 4.0). The primary tables are available from the Melbourne Water Open Data Hub (https://data-melbournewater.opendata.arcgis.com; services `MWC_ETP_Daily_ElectricityUse_From2014`, `MWC_ETP_Daily_InfluentQuality_From2014`, `MWC_ETP_Daily_EffluentQuality_From2014`, `MWC_ETP_Hourly_InfluentFlow_From2009`, `MWC_ETP_Hourly_EffluentFlow_From2009`). The copies used here, their SHA-256 checksums and the reconstructed daily table are provided with the code in a public repository (https://github.com/phamnam123lite-svg/etp-energy-benchmark-audit), and an archived release with a DOI will be created on acceptance. The data are redistributed with attribution to Melbourne Water and to Bagherzadeh (2021).
+The benchmark file is available from Mendeley Data (https://doi.org/10.17632/pprkvz3vbd.1, CC BY 4.0). The primary tables are available from the Melbourne Water Open Data Hub (https://data-melbournewater.opendata.arcgis.com; services `MWC_ETP_Daily_ElectricityUse_From2014`, `MWC_ETP_Daily_InfluentQuality_From2014`, `MWC_ETP_Daily_EffluentQuality_From2014`, `MWC_ETP_Hourly_InfluentFlow_From2009`, `MWC_ETP_Hourly_EffluentFlow_From2009`). The copies used here, their SHA-256 checksums and the reconstructed daily table are provided with the code in a public repository (https://github.com/phamnam123lite-svg/etp-energy-benchmark-audit), and an archived release with a DOI will be created on acceptance. The data are redistributed with attribution to Melbourne Water and to Bagherzadeh (2021). Supplementary tables S0–S14, Fig. S1 and Note S1 are provided in the Supplementary Material.
 
 # Code availability statement
 
-All Python scripts (`01_build_dataset.py` to `08_summary_figures.py`, `run_all.py`), the list of library versions and all result tables are in the same repository under the MIT licence. `python run_all.py` regenerates every table and figure from the raw files in about six minutes. No proprietary software was used.
+All Python scripts (`01_build_dataset.py` to `11_make_supplement.py`, `run_all.py`), the list of library versions and all result tables are in the same repository under the MIT licence. `python run_all.py` regenerates every table and figure from the raw files in about seven minutes. No proprietary software was used.
 
 # CRediT authorship contribution statement
 
-**Viet Nam Tran:** Conceptualization, Methodology, Formal analysis, Data curation, Validation, Writing – review and editing. [To be adjusted by the author to reflect the actual division of work; see the declaration below.]
+**Viet Nam Tran:** Conceptualization, Methodology, Formal analysis, Data curation, Validation, Writing – review and editing.
 
 # Declaration of generative AI in the research and writing process
 
-During the preparation of this work the author used Claude (Anthropic) to search the literature, retrieve the open data, write and run the analysis code, and draft the text and figures. The author reviewed and edited the content as needed and takes full responsibility for the content of the publication. [The author must check every result and reference before this statement is submitted, and adapt the wording to the target journal's policy.]
+During the preparation of this work the author used Claude (Anthropic) to search the literature, retrieve the open data, write and run the analysis code, and draft the text and figures. The author reviewed and edited the content as needed and takes full responsibility for the content of the publication.
 
 # Funding
 
-[To be completed by the author.]
+This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
 
 # Declaration of competing interest
 
-[To be completed by the author.]
+The author declares no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
 
 # References
 
@@ -302,6 +331,8 @@ Khaled, Q., Mallak, B., Kaymak, U., Genga, L., 2026. Explainable uncertainty qua
 
 Longo, S., d'Antoni, B.M., Bongards, M., Chaparro, A., Cronrath, A., Fatone, F., Lema, J.M., Mauricio-Iglesias, M., Soares, A., Hospido, A., 2016. Monitoring and diagnosis of energy consumption in wastewater treatment plants. A state of the art and proposals for improvement. Appl. Energy 179, 1251–1268. https://doi.org/10.1016/j.apenergy.2016.07.043
 
+Mateos Bravo, J., Pacheco Rodríguez, C.M., Berrocal, J., Herrera, J.L., Cortés Pérez, J.P., 2026. Data quality over model complexity: a leakage-aware, horizon-aware forecasting pipeline for degraded sensor streams in a small-population wastewater treatment plant. Comput.-Aided Civ. Infrastruct. Eng. 49, 100134. https://doi.org/10.1016/j.cacaie.2026.100134
+
 Melbourne Water, 2023. Major Hazard Facility Safety Case Summary: Eastern Treatment Plant, March 2023. https://melbournewater.com.au/media/21291/download
 
 Melbourne Water, n.d. Melbourne Water wins Earth Award for bioenergy project. https://www.melbournewater.com.au/node/8231 (accessed 12 November 2026)
@@ -309,6 +340,8 @@ Melbourne Water, n.d. Melbourne Water wins Earth Award for bioenergy project. ht
 Newhart, K.B., Holloway, R.W., Hering, A.S., Cath, T.Y., 2019. Data-driven performance analyses of wastewater treatment plants: a review. Water Res. 157, 498–513. https://doi.org/10.1016/j.watres.2019.03.030
 
 Oliveira, P., Fernandes, B., Analide, C., Novais, P., 2021. Forecasting energy consumption of wastewater treatment plants with a transfer learning approach for sustainable cities. Electronics 10 (10), 1149. https://doi.org/10.3390/electronics10101149
+
+Paepae, T., 2026. Temporally admissible and explainability-driven one-day-ahead soft-sensing of effluent total nitrogen in wastewater treatment: mechanistic feature engineering, statistical benchmarking, and process discovery. Results Eng. 32, 112202. https://doi.org/10.1016/j.rineng.2026.112202
 
 Pedregosa, F., et al., 2011. Scikit-learn: machine learning in Python. J. Mach. Learn. Res. 12, 2825–2830.
 

@@ -3,7 +3,8 @@ import platform, subprocess, sys, time
 from pathlib import Path
 here = Path(__file__).resolve().parent
 steps = ["01_build_dataset.py", "02_audit.py", "03_models.py", "04_uncertainty.py", "05_interpret.py",
-         "06_augmentation_leakage.py", "07_out_of_time.py", "08_summary_figures.py"]
+         "06_augmentation_leakage.py", "07_out_of_time.py", "08_summary_figures.py",
+         "09_explain_vs_forecast.py", "10_generation_check.py", "11_make_supplement.py"]
 t0 = time.time()
 for s in steps:
     print(f"\n===== {s} =====", flush=True)

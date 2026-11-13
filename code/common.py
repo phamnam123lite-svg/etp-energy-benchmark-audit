@@ -38,47 +38,65 @@ def metrics(y, yhat):
     }
 
 
-def dm_test(y, f1, f2, h=1):
-    """Diebold-Mariano test on squared-error loss with the Harvey-Leybourne-Newbold
-    small-sample correction. Negative statistic => forecast 1 has lower loss than forecast 2.
+def dm_test(y, f1, f2, t=None, h=1, bandwidth_days=14):
+    """Diebold-Mariano test on squared-error loss with the Harvey-Leybourne-Newbold small-sample
+    correction. Negative statistic => forecast 1 has lower loss than forecast 2.
+    If `t` (dates of the observations) is given, the long-run variance uses a Bartlett kernel on the
+    CALENDAR distance between observations (bandwidth in days), which is valid for irregularly spaced
+    rows; otherwise a Newey-West estimator on row lags is used (regular daily series).
     Returns (statistic, two-sided p-value from Student-t with n-1 d.o.f.)."""
     from scipy import stats
     y, f1, f2 = (np.asarray(a, float) for a in (y, f1, f2))
     d = (y - f1) ** 2 - (y - f2) ** 2
-    n = len(d); dbar = d.mean()
-    # Newey-West long-run variance; truncation lag grows with n so that serial
-    # correlation in the loss differential is not ignored for one-step forecasts
-    L = max(h - 1, int(np.floor(4 * (n / 100.0) ** (2.0 / 9.0))))
-    dc = d - dbar
-    lrv = np.sum(dc * dc) / n
-    for k in range(1, L + 1):
-        w = 1 - k / (L + 1)
-        lrv += 2 * w * np.sum(dc[k:] * dc[:-k]) / n
+    n = len(d); dc = d - d.mean()
+    if t is not None:
+        days = (pd.DatetimeIndex(t) - pd.DatetimeIndex(t)[0]).days.values.astype(float)
+        w = np.clip(1.0 - np.abs(days[:, None] - days[None, :]) / (bandwidth_days + 1.0), 0.0, None)
+        lrv = float(dc @ w @ dc) / n
+    else:
+        L = max(h - 1, int(np.floor(4 * (n / 100.0) ** (2.0 / 9.0))))
+        lrv = np.sum(dc * dc) / n
+        for k in range(1, L + 1):
+            lrv += 2 * (1 - k / (L + 1)) * np.sum(dc[k:] * dc[:-k]) / n
     if lrv <= 0:
         return np.nan, np.nan
-    stat = dbar / np.sqrt(lrv / n)
+    stat = d.mean() / np.sqrt(lrv / n)
     stat *= np.sqrt((n + 1 - 2 * h + h * (h - 1) / n) / n)
-    p = 2 * (1 - stats.t.cdf(abs(stat), df=n - 1))
-    return float(stat), float(p)
+    return float(stat), float(2 * (1 - stats.t.cdf(abs(stat), df=n - 1)))
 
 
-def block_bootstrap_ci(y, f1, f2=None, stat="RMSE", block=14, B=2000, seed=SEED, alpha=0.05):
-    """Moving-block bootstrap CI for a metric of f1 (or for metric(f1) - metric(f2))."""
+def block_bootstrap_ci(y, f1, f2=None, t=None, stat="RMSE", block=14, block_days=21, B=2000, seed=SEED, alpha=0.05):
+    """Block-bootstrap CI for a metric of f1 (or for metric(f1) - metric(f2)).
+    With `t`: non-overlapping CALENDAR blocks of `block_days` days are resampled (irregular rows keep
+    their true spacing inside a block). Without `t`: moving blocks of `block` consecutive rows."""
     rng = np.random.default_rng(seed)
-    y = np.asarray(y, float); f1 = np.asarray(f1, float)
-    n = len(y); nb = int(np.ceil(n / block))
-    starts_max = n - block + 1
+    y = np.asarray(y, float); f1 = np.asarray(f1, float); f2 = None if f2 is None else np.asarray(f2, float)
+    n = len(y)
 
     def m(idx, f):
         e = y[idx] - f[idx]
         return np.sqrt(np.mean(e ** 2)) if stat == "RMSE" else np.mean(np.abs(e))
 
+    if t is not None:
+        days = (pd.DatetimeIndex(t) - pd.DatetimeIndex(t)[0]).days.values
+        blocks = [np.where(days // block_days == k)[0] for k in np.unique(days // block_days)]
+        draw = lambda: np.concatenate([blocks[i] for i in rng.integers(0, len(blocks), len(blocks))])
+    else:
+        nb = int(np.ceil(n / block))
+        draw = lambda: (rng.integers(0, n - block + 1, nb)[:, None] + np.arange(block)[None, :]).ravel()[:n]
     out = np.empty(B)
     for b in range(B):
-        s = rng.integers(0, starts_max, nb)
-        idx = (s[:, None] + np.arange(block)[None, :]).ravel()[:n]
-        out[b] = m(idx, f1) - (m(idx, np.asarray(f2, float)) if f2 is not None else 0.0)
+        idx = draw()
+        out[b] = m(idx, f1) - (m(idx, f2) if f2 is not None else 0.0)
     return float(np.quantile(out, alpha / 2)), float(np.quantile(out, 1 - alpha / 2))
+
+
+def holm(pvals):
+    """Holm step-down adjusted p-values."""
+    p = np.asarray(pvals, float); order = np.argsort(p); adj = np.empty_like(p); run = 0.0
+    for rank, i in enumerate(order):
+        run = max(run, (len(p) - rank) * p[i]); adj[i] = min(1.0, run)
+    return adj
 
 
 def set_style():

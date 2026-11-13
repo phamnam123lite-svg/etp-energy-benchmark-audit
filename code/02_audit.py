@@ -68,6 +68,33 @@ for name, (s, bcol, rcol) in src.items():
         rows.append({"variable": name, "benchmark value compared with": f"row position, rows {a}-{z - 1}", "n": k, "pearson_r": rr,
                      "median_abs_diff_kL_s": float(np.nanmedian(np.abs(b[a:z] - idx[a:z]))),
                      "rows_equal_to_3_decimals": int((np.abs(b[a:z] - idx[a:z]) < 1.5e-3).sum())})
+# ---- exact reconstruction rule: mean of the hourly records of the i-th UTC day counted from 31 Dec 2008,
+#      leaving out the record stamped 00:00 UTC (duplicated hour stamps are NOT removed)
+recon, rec_rows = {}, []
+for name, fn, col, bcol in [("inflow", "MWC_ETP_Hourly_InfluentFlow_From2009_compact.csv", "ETP_Inflow_kL_s_1", "bm_qin"),
+                            ("outflow", "MWC_ETP_Hourly_EffluentFlow_From2009_compact.csv", "ETP_Outflow_kL_s_1", "bm_qout")]:
+    h = pd.read_csv(RAW / fn)
+    h["ts"] = pd.to_datetime(h.start_epoch_hour * 3600, unit="s", utc=True)
+    h = h[h.ts.dt.hour != 0]
+    s_ = h.groupby(h.ts.dt.tz_localize(None).dt.normalize())[col].mean()
+    b = mt[bcol].values; sv = s_.values
+    by_pos = int((np.abs(sv[:n] - b) < 5.1e-4).sum())
+    i = j = hit = 0; skipped = []; x = np.full(n, np.nan)          # ordered alignment that may skip source days
+    while i < n and j < len(sv):
+        if abs(sv[j] - b[i]) < 5.1e-4:
+            x[i] = sv[j]; hit += 1; i += 1; j += 1
+        else:
+            k = next((k for k in range(1, 6) if j + k < len(sv) and abs(sv[j + k] - b[i]) < 5.1e-4), None)
+            if k is None:
+                x[i] = sv[j]; i += 1; j += 1
+            else:
+                skipped += [str(dd.date()) for dd in s_.index[j:j + k]]; j += k
+    recon[name] = x
+    rec_rows.append({"variable": name, "benchmark_rows": n, "equal_to_3_decimals_by_row_position": by_pos,
+                     "equal_to_3_decimals_in_order_allowing_skipped_source_days": hit, "source_days_skipped": "; ".join(skipped) or "none",
+                     "first_source_day": str(s_.index[0].date()), "last_source_day_used": str(s_.index[j - 1].date()),
+                     "pearson_r_in_order": float(np.corrcoef(x, b)[0, 1])})
+pd.DataFrame(rec_rows).round(6).to_csv(TAB / "T2b_flow_exact_reconstruction.csv", index=False)
 t2 = pd.DataFrame(rows)
 t2.round(4).to_csv(TAB / "T2_flow_misdating.csv", index=False)
 src_span = (aligned["inflow"][1][0].date(), aligned["inflow"][1][-1].date())
@@ -159,18 +186,18 @@ fig.align_ylabels(); savefig(fig, "Fig1_grid_vs_total_supply"); plt.close(fig)
 fig, ax = plt.subplots(1, 3, figsize=(7.4, 2.7))
 ok = mt.qin_mean.notna()
 r_same = np.corrcoef(mt.bm_qin[ok], mt.qin_mean[ok])[0, 1]
-r_idx = np.corrcoef(mt.bm_qin, aligned["inflow"][0])[0, 1]
+n_exact = int((np.abs(recon["inflow"] - mt.bm_qin.values) < 5.1e-4).sum())
 lim = (2, 9)
 ax[0].scatter(mt.qin_mean, mt.bm_qin, s=4, color=C["blue"], alpha=0.5, lw=0)
 ax[0].set(xlabel="Source inflow, same day (kL s$^{-1}$)", ylabel="Benchmark 'avg_inflow' (kL s$^{-1}$)", xlim=lim, ylim=lim,
           title=f"(a) same day, r = {r_same:.2f}")
-ax[1].scatter(aligned["inflow"][0], mt.bm_qin, s=4, color=C["red"], alpha=0.5, lw=0)
-ax[1].set(xlabel="Source inflow, i-th day from\n31 Dec 2008 (kL s$^{-1}$)", xlim=lim, ylim=lim, title=f"(b) row position, r = {r_idx:.3f}")
+ax[1].scatter(recon["inflow"], mt.bm_qin, s=4, color=C["red"], alpha=0.5, lw=0)
+ax[1].set(xlabel="Source inflow, i-th day from\n31 Dec 2008 (kL s$^{-1}$)", xlim=lim, ylim=lim, title=f"(b) row position: {n_exact:,}/{n:,} equal")
 for a in ax[:2]:
     a.plot(lim, lim, color="0.4", lw=0.6, ls=":")
 w = slice(0, 120)
 ax[2].plot(range(120), mt.bm_qin.values[w], color=C["black"], lw=1.0, label="benchmark, rows 1-120\n(labelled Jan-Jun 2014)")
-ax[2].plot(range(120), aligned["inflow"][0][w], color=C["red"], lw=0.8, ls="--", label="source, 31 Dec 2008 +")
+ax[2].plot(range(120), recon["inflow"][w], color=C["red"], lw=0.8, ls="--", label="source, 31 Dec 2008 +")
 ax[2].plot(range(120), mt.qin_mean.values[w], color=C["blue"], lw=0.8, label="source, labelled dates")
 ax[2].set(xlabel="Row number", title="(c) first 120 rows", ylim=(2.2, 8)); ax[2].legend(frameon=False, fontsize=6, loc="upper left")
 fig.tight_layout(); savefig(fig, "Fig2_flow_misdating"); plt.close(fig)

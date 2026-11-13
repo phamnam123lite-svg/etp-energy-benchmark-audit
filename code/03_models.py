@@ -6,8 +6,8 @@ import time
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold, TimeSeriesSplit
-from common import TAB, PROC, SEED, metrics, dm_test, block_bootstrap_ci
-from features import FEATURES, TARGETS, load, chrono_split, make_model, inner_time, inner_shuffled
+from common import TAB, PROC, SEED, metrics, dm_test, block_bootstrap_ci, holm
+from features import FEATURES, TARGETS, MODELS, load, chrono_split, make_model, inner_time, inner_shuffled
 
 t0 = time.time()
 rows, preds = [], {}
@@ -27,7 +27,7 @@ for target in TARGETS:
     pers = base["Persistence (previous day)"]
     mase_den = np.mean(np.abs(y_all.diff().loc[:df.index[tr][-1]].dropna()))     # in-sample one-day naive MAE
     for fs, cols in FEATURES.items():
-        for kind in ("Ridge", "RF", "HGB"):
+        for kind in MODELS:
             m = make_model(kind, inner_time()).fit(df[cols].values[tr], y_tr)
             P[f"{fs}|{kind}"] = m.predict(df[cols].values[te])
     for name in P.columns[1:]:
@@ -35,11 +35,11 @@ for target in TARGETS:
         r = {"target": target, "model": name, **metrics(y_te, f)}
         r["skill_vs_persistence_%"] = 100 * (1 - r["RMSE"] / metrics(y_te, pers)["RMSE"])
         r["MASE"] = r["MAE"] / mase_den
-        lo, hi = block_bootstrap_ci(y_te, f)
+        lo, hi = block_bootstrap_ci(y_te, f, t=P.index)
         r["RMSE_ci_lo"], r["RMSE_ci_hi"] = lo, hi
         if name != "Persistence (previous day)":
-            r["DM_stat_vs_persistence"], r["DM_p"] = dm_test(y_te, f, pers)
-            dlo, dhi = block_bootstrap_ci(y_te, f, pers)
+            r["DM_stat_vs_persistence"], r["DM_p"] = dm_test(y_te, f, pers, t=P.index)
+            dlo, dhi = block_bootstrap_ci(y_te, f, pers, t=P.index)
             r["dRMSE_vs_pers_ci_lo"], r["dRMSE_vs_pers_ci_hi"] = dlo, dhi
         rows.append(r)
     preds[target] = P
@@ -52,15 +52,30 @@ t7.round(4).to_csv(TAB / "T7_holdout_results.csv", index=False)
 rows = []
 for target, P in preds.items():
     y = P.y.values
-    for kind in ("Ridge", "RF", "HGB"):
+    for kind in MODELS:
         for a, b in [("BM", "BM_flowfix"), ("RC_noflow", "RC"), ("BM", "RC"), ("BM_rowlag", "RC_dyn"), ("LAG_only", "RC_dyn"),
                      ("RC_unscreened", "RC"), ("RC_dyn_unscreened", "RC_dyn"), ("RC", "RC_qalign"), ("RC_dyn", "RC_dyn_qalign")]:
             fa, fb = P[f"{a}|{kind}"].values, P[f"{b}|{kind}"].values
-            lo, hi = block_bootstrap_ci(y, fb, fa)
-            st, p = dm_test(y, fb, fa)
+            lo, hi = block_bootstrap_ci(y, fb, fa, t=P.index)
+            st, p = dm_test(y, fb, fa, t=P.index)
             rows.append({"target": target, "model": kind, "A": a, "B": b, "RMSE_A": metrics(y, fa)["RMSE"], "RMSE_B": metrics(y, fb)["RMSE"],
                          "dRMSE_B_minus_A": metrics(y, fb)["RMSE"] - metrics(y, fa)["RMSE"], "ci_lo": lo, "ci_hi": hi, "DM_stat": st, "DM_p": p})
 pd.DataFrame(rows).round(4).to_csv(TAB / "T8_feature_set_contrasts.csv", index=False)
+
+# ---------------------------------------------------------------- primary tests with Holm adjustment
+rows = []
+for target, P in preds.items():
+    y = P.y.values
+    for lab, fa, fb in [("H1: benchmark file (BM, HGB) vs persistence", "Persistence (previous day)", "BM|HGB"),
+                        ("H2: re-dated flows (BM_flowfix, HGB) vs benchmark file (BM, HGB)", "BM|HGB", "BM_flowfix|HGB"),
+                        ("reconstructed + lags (RC_dyn, HGB) vs persistence", "Persistence (previous day)", "RC_dyn|HGB"),
+                        ("reconstructed + lags (RC_dyn, HGB) vs lags only (LAG_only, HGB)", "LAG_only|HGB", "RC_dyn|HGB")]:
+        st, p = dm_test(y, P[fb].values, P[fa].values, t=P.index)
+        lo, hi = block_bootstrap_ci(y, P[fb].values, P[fa].values, t=P.index)
+        rows.append({"target": target, "comparison": lab, "RMSE_reference": metrics(y, P[fa].values)["RMSE"], "RMSE_candidate": metrics(y, P[fb].values)["RMSE"],
+                     "dRMSE": metrics(y, P[fb].values)["RMSE"] - metrics(y, P[fa].values)["RMSE"], "ci_lo": lo, "ci_hi": hi, "DM_stat": st, "DM_p": p})
+t8b = pd.DataFrame(rows); t8b["DM_p_holm"] = holm(t8b.DM_p.values)
+t8b.round(4).to_csv(TAB / "T8b_primary_tests_holm.csv", index=False)
 
 # ---------------------------------------------------------------- validation-protocol effect
 rows = []

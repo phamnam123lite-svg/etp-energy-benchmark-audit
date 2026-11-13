@@ -1,0 +1,9 @@
+target,comparison,RMSE_reference,RMSE_candidate,dRMSE,ci_lo,ci_hi,DM_stat,DM_p,DM_p_holm
+grid,"H1: benchmark file (BM, HGB) vs persistence",40.6605,43.5283,2.8678,-4.0053,10.3912,0.8053,0.4212,0.8424
+grid,"H2: re-dated flows (BM_flowfix, HGB) vs benchmark file (BM, HGB)",43.5283,27.7853,-15.743,-19.3628,-11.0908,-5.3835,0.0,0.0
+grid,"reconstructed + lags (RC_dyn, HGB) vs persistence",40.6605,23.9799,-16.6806,-21.845,-11.121,-5.5127,0.0,0.0
+grid,"reconstructed + lags (RC_dyn, HGB) vs lags only (LAG_only, HGB)",35.4906,23.9799,-11.5107,-14.3416,-8.0089,-6.2486,0.0,0.0
+total,"H1: benchmark file (BM, HGB) vs persistence",40.2848,39.1406,-1.1442,-6.6364,5.043,-0.3972,0.6915,0.8424
+total,"H2: re-dated flows (BM_flowfix, HGB) vs benchmark file (BM, HGB)",39.1406,23.2689,-15.8717,-20.2489,-9.982,-6.0258,0.0,0.0
+total,"reconstructed + lags (RC_dyn, HGB) vs persistence",40.2848,18.9828,-21.302,-26.3927,-15.8813,-7.0376,0.0,0.0
+total,"reconstructed + lags (RC_dyn, HGB) vs lags only (LAG_only, HGB)",33.1304,18.9828,-14.1475,-17.5474,-10.115,-7.8484,0.0,0.0
